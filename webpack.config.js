@@ -87,7 +87,6 @@ var options = {
       },
       {
         test: /\.(ts|tsx)$/,
-        exclude: /node_modules/,
         use: [
           {
             loader: require.resolve('ts-loader'),

@@ -5,16 +5,6 @@
   flex-direction: column;
 }
 
-.sidepanel-header {
-  padding: 16px;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.sidepanel-header h1 {
-  margin: 0;
-  font-size: 18px;
-}
-
 .sidepanel-content {
   flex: 1;
   padding: 16px;
@@ -26,25 +16,46 @@
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 16px;
-  padding: 16px;
 }
 
-.section-title {
+.section-header {
+  background-color: #f8f8f8;
+  padding: 8px 12px;
+  border-bottom: 1px solid #ddd;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.section-header:hover {
+  background-color: #f0f0f0;
+}
+
+.section-header h2 {
   font-size: 16px;
-  margin: 0 0 12px 0;
+  margin: 0;
   color: #333;
+  cursor: pointer;
 }
 
 .section-items {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  padding: 8px;
 }
 
 .shortcut-item {
   display: flex;
   align-items: center;
   gap: 8px;
+  padding: 4px;
+  border-bottom: 1px solid #eee;
+}
+
+.shortcut-item:last-child {
+  border-bottom: none;
 }
 
 .shortcut {
@@ -59,4 +70,142 @@
 .description {
   font-size: 14px;
   color: #666;
+}
+
+.drop-indicator {
+  height: 2px;
+  background-color: blue;
+  margin: 2px 0;
+}
+
+.section-card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 16px;
+}
+
+.section-header {
+  background-color: #f8f8f8;
+  padding: 8px 12px;
+  border-bottom: 1px solid #ddd;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.section-header:hover {
+  background-color: #f0f0f0;
+}
+
+.section-header h2 {
+  font-size: 16px;
+  margin: 0;
+  color: #333;
+  cursor: pointer;
+}
+
+.section-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+}
+
+.shortcut-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px;
+  border-bottom: 1px solid #eee;
+}
+
+.shortcut-item:last-child {
+  border-bottom: none;
+}
+
+.shortcut {
+  background: #f5f5f5;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 12px;
+  border: 1px solid #ddd;
+}
+
+.description {
+  font-size: 14px;
+  color: #666;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px;
+  cursor: pointer;
+}
+
+.section-header .edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.section-header:hover .edit-icon {
+  visibility: visible;
+}
+
+.edit-icon {
+  visibility: hidden;
+  cursor: pointer;
+  margin-left: 5px;
+  font-size: 1.2em; /* Increase size */
+  color: #888; /* Improve visibility */
+}
+
+.save-icon,
+.cancel-icon {
+  cursor: pointer;
+  margin-left: 5px;
+  font-size: 1.2em;
+  color: #888;
+}
+
+.edit-buttons {
+  display: flex;
+  justify-content: flex-end;
+  padding: 5px;
+}
+
+.edit-buttons button {
+  margin-left: 5px;
+}
+
+.section-title-input {
+  font-size: 16px;
+  font-weight: normal;
+  color: #333;
+  border: none;
+  background-color: #f8f8f8;
+  padding: 8px 12px;
+  border-radius: 8px 8px 0 0;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.shortcut-input,
+.description-input {
+  font-size: 14px;
+  color: #666;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 4px 8px;
+  margin: 0;
+  width: 50%;
+  box-sizing: border-box;
 }

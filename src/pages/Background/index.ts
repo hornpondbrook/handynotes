@@ -1,7 +1,11 @@
-chrome.action.onClicked.addListener(async (tab) => {
-  // Toggle the side panel
-  await chrome.sidePanel.toggle();
-});
+// background.ts
 
-// Set initial state
-chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
+// Ensure Chrome API types are available
+/// <reference types="chrome" />
+
+// Set the side panel behavior
+chrome.sidePanel
+  .setPanelBehavior({ openPanelOnActionClick: true })
+  .catch((error: Error) => {
+    console.error('Error setting side panel behavior:', error);
+  });
