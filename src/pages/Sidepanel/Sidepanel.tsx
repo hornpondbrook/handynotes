@@ -3,8 +3,11 @@ import { Sections, Section as SectionType } from '../../types';
 import { StorageUtils } from '../../utils/storage';
 import { initializeInitialSections } from '../../data/initialData';
 import Section from './Section';
-import './styles.css';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import { AddBox as AddBoxIcon } from '@mui/icons-material';
+import { ThemeProvider } from '@mui/material/styles';
+import { Box, Button } from '@mui/material';
+import theme from '../../theme';
 
 interface SidepanelState {
   sections: Sections;
@@ -112,45 +115,72 @@ const Sidepanel: React.FC = () => {
   }, []);
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <Droppable droppableId="sections">
-        {(provided) => (
-          <div
-            className="sidepanel"
-            {...provided.droppableProps}
-            ref={provided.innerRef}
-          >
-            {sections.map((section, index) => (
-              <Draggable key={section.id} draggableId={`${section.id}-${index}`} index={index}>
-                {(provided) => (
-                  <div
-                    className="section-card"
-                    ref={provided.innerRef}
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps}
-                  >
-                    <Section
-                      key={section.id}
-                      section={section}
-                      sectionIndex={index}
-                      onSectionUpdate={handleSectionSave}
-                      onCancel={() => handleSectionCancel(section.id)}
-                      onDelete={handleSectionDelete}
-                      initialEditMode={section.isNew} // Changed from title check to isNew flag
-                    />
-                  </div>
-                )}
-              </Draggable>
-            ))}
-            {provided.placeholder}
-            <button className="add-section-button" onClick={handleAddSection}>
-              <span className="material-icons">add_box</span>
-              Add Section
-            </button>
-          </div>
-        )}
-      </Droppable>
-    </DragDropContext>
+    <ThemeProvider theme={theme}>
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Droppable droppableId="sections">
+          {(provided) => (
+            <Box
+              sx={{
+                width: '100%',
+                height: '100vh',
+                display: 'flex',
+                flexDirection: 'column',
+                padding: 2,
+                flex: 1,
+                overflowY: 'auto',
+                overflowX: 'hidden',
+                boxSizing: 'border-box'
+              }}
+              {...provided.droppableProps}
+              ref={provided.innerRef}
+            >
+              {sections.map((section, index) => (
+                <Draggable key={section.id} draggableId={`${section.id}-${index}`} index={index}>
+                  {(provided) => (
+                    <Box
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      sx={{
+                        border: 'none',
+                        backgroundColor: 'transparent'
+                      }}
+                    >
+                      <Section
+                        key={section.id}
+                        section={section}
+                        sectionIndex={index}
+                        onSectionUpdate={handleSectionSave}
+                        onCancel={() => handleSectionCancel(section.id)}
+                        onDelete={handleSectionDelete}
+                        initialEditMode={section.isNew} // Changed from title check to isNew flag
+                      />
+                    </Box>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+              <Button
+                variant="outlined"
+                startIcon={<AddBoxIcon />}
+                onClick={handleAddSection}
+                sx={{
+                  margin: 2,
+                  borderStyle: 'dashed',
+                  color: 'text.secondary',
+                  '&:hover': {
+                    borderColor: 'text.primary',
+                    color: 'text.primary'
+                  }
+                }}
+              >
+                Add Section
+              </Button>
+            </Box>
+          )}
+        </Droppable>
+      </DragDropContext>
+    </ThemeProvider>
   );
 };
 

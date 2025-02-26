@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import Item from './Item';
 import { Section as SectionType } from '../../types';
+import { Box, IconButton, TextField, Button, Typography, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import {
+  Save as SaveIcon,
+  Close as CloseIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Add as AddIcon
+} from '@mui/icons-material';
 
 interface SectionProps {
   section: SectionType;
@@ -22,6 +30,7 @@ const Section: React.FC<SectionProps> = ({
   const [isEditing, setIsEditing] = useState(initialEditMode);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [title, setTitle] = useState(section.title);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const toggleCollapse = () => {
     setIsCollapsed(!isCollapsed);
@@ -64,9 +73,16 @@ const Section: React.FC<SectionProps> = ({
 
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent collapse toggle
-    if (window.confirm('Are you sure you want to delete this section?')) {
-      onDelete(section.id);
-    }
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    setDeleteDialogOpen(false);
+    onDelete(section.id);
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false);
   };
 
   const handleDeleteItem = (itemIndex: number) => {
@@ -83,68 +99,158 @@ const Section: React.FC<SectionProps> = ({
   }, [isEditing]);
 
   return (
-    <div className="section-card">
-      <div
-        className="section-header"
-        onClick={isEditing ? undefined : toggleCollapse}
+    <>
+      <Box
+        sx={{
+          backgroundColor: 'background.paper',
+          borderRadius: 2,
+          boxShadow: 1,
+          marginBottom: 2,
+          border: 'none',  // Add this to remove default border
+          '& .section-controls': {
+            display: 'flex',
+            gap: 1,
+            alignItems: 'center',
+            opacity: 0,
+            transition: 'opacity 0.2s ease'
+          },
+          '&:hover .section-controls': {
+            opacity: 1
+          }
+        }}
       >
-        {isEditing ? (
-          <input
-            type="text"
-            className="section-title-input"
-            value={title}
-            onChange={handleTitleChange}
-          />
-        ) : (
-          <h2>{section.title}</h2>
-        )}
-        <div className="section-controls">
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '6px 8px',
+            backgroundColor: 'background.default',
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            cursor: isEditing ? 'default' : 'pointer',
+            '&:hover': {
+              backgroundColor: 'action.hover'
+            }
+          }}
+          onClick={isEditing ? undefined : toggleCollapse}
+        >
           {isEditing ? (
-            <>
-              <span onClick={handleSaveClick} className="control-button material-icons">save</span>
-              <span onClick={handleCancelClick} className="control-button material-icons">close</span>
-            </>
-          ) : (
-            <>
-              <span onClick={handleEditClick} className="control-button material-icons">edit</span>
-              <span onClick={handleDeleteClick} className="control-button material-icons delete-icon">delete</span>
-            </>
-          )}
-        </div>
-      </div>
-      {!isCollapsed && (
-        <div className="section-content">
-          {section.items.map((item, index) => {
-            const handleItemUpdate = (newShortcut: string, newDescription: string) => {
-              const newItems = section.items.map((currentItem, i) => {
-                if (i === index) {
-                  return { ...currentItem, shortcut: newShortcut, description: newDescription };
+            <TextField
+              fullWidth
+              variant="outlined"
+              size="small"
+              value={title}
+              onChange={handleTitleChange}
+              sx={{
+                marginRight: 2,
+                '& .MuiOutlinedInput-root': {
+                  backgroundColor: 'background.paper'
                 }
-                return currentItem;
-              });
-              const updatedSection = { ...section, items: newItems };
-              onSectionUpdate(sectionIndex, updatedSection);
-            };
-            return (
-              <Item
-                key={item.id}
-                shortcut={item.shortcut}
-                description={item.description}
-                isEditing={isEditing}
-                onItemUpdate={handleItemUpdate}
-                onDelete={() => handleDeleteItem(index)} // Add delete handler
-              />
-            );
-          })}
-          {isEditing && (
-            <button className="add-item-button" onClick={handleAddItem}>
-              <span className="material-icons">add</span>
-              Add Item
-            </button>
+              }}
+            />
+          ) : (
+            <Typography variant="h6" component="h2" sx={{ fontSize: '0.875rem', lineHeight: 1.2 }}>
+              {section.title}
+            </Typography>
           )}
-        </div>
-      )}
-    </div>
+          <Box sx={{
+            display: 'flex',
+            gap: 0.5,
+            opacity: 0,
+            transition: 'opacity 0.2s ease',
+            '&:hover': {
+              opacity: 1
+            }
+          }}>
+            {isEditing ? (
+              <>
+                <IconButton onClick={handleSaveClick} color="primary" sx={{ '& svg': { fontSize: 20 } }}>
+                  <SaveIcon />
+                </IconButton>
+                <IconButton onClick={handleCancelClick} color="error" sx={{ '& svg': { fontSize: 20 } }}>
+                  <CloseIcon />
+                </IconButton>
+              </>
+            ) : (
+              <>
+                <IconButton onClick={handleEditClick} color="primary" sx={{ '& svg': { fontSize: 20 } }}>
+                  <EditIcon />
+                </IconButton>
+                <IconButton onClick={handleDeleteClick} color="error" sx={{ '& svg': { fontSize: 20 } }}>
+                  <DeleteIcon />
+                </IconButton>
+              </>
+            )}
+          </Box>
+        </Box>
+
+        {!isCollapsed && (
+          <Box sx={{ padding: 2 }}>
+            {section.items.map((item, index) => {
+              const handleItemUpdate = (newShortcut: string, newDescription: string) => {
+                const newItems = section.items.map((currentItem, i) => {
+                  if (i === index) {
+                    return { ...currentItem, shortcut: newShortcut, description: newDescription };
+                  }
+                  return currentItem;
+                });
+                const updatedSection = { ...section, items: newItems };
+                onSectionUpdate(sectionIndex, updatedSection);
+              };
+              return (
+                <Item
+                  key={item.id}
+                  shortcut={item.shortcut}
+                  description={item.description}
+                  isEditing={isEditing}
+                  onItemUpdate={handleItemUpdate}
+                  onDelete={() => handleDeleteItem(index)} // Add delete handler
+                />
+              );
+            })}
+            {isEditing && (
+              <Button
+                variant="outlined"
+                startIcon={<AddIcon />}
+                onClick={handleAddItem}
+                sx={{
+                  margin: 2,
+                  borderStyle: 'dashed',
+                  color: 'text.secondary',
+                  '&:hover': {
+                    borderColor: 'text.primary',
+                    color: 'text.primary'
+                  }
+                }}
+              >
+                Add Item
+              </Button>
+            )}
+          </Box>
+        )}
+        <Dialog
+          open={deleteDialogOpen}
+          onClose={handleDeleteCancel}
+          aria-labelledby="delete-dialog-title"
+        >
+          <DialogTitle id="delete-dialog-title">Delete Section</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Are you sure you want to delete this section? This action cannot be undone.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleDeleteCancel} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={handleDeleteConfirm} color="error" variant="contained">
+              Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Box>
+    </>
   );
 };
 

@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { Box, TextField, Chip, Typography, IconButton } from '@mui/material';
+import { Delete as DeleteIcon } from '@mui/icons-material';
 
 interface ItemProps {
   shortcut: string;
@@ -23,30 +25,78 @@ const Item: React.FC<ItemProps> = ({ shortcut, description, isEditing, onItemUpd
   };
 
   return (
-    <div className="shortcut-item">
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1,
+        p: 0.5,
+        borderBottom: '1px solid',
+        borderColor: 'divider',
+        '&:last-child': {
+          borderBottom: 'none'
+        }
+      }}
+    >
       {isEditing ? (
         <>
-          <input
-            type="text"
-            className="shortcut-input"
+          <TextField
+            variant="outlined"
+            size="small"
             value={localShortcut}
             onChange={handleShortcutChange}
+            sx={{ width: 120 }}
+            placeholder="Shortcut"
           />
-          <input
-            type="text"
-            className="description-input"
+          <TextField
+            variant="outlined"
+            size="small"
             value={localDescription}
             onChange={handleDescriptionChange}
+            sx={{ flexGrow: 1 }}
+            placeholder="Description"
           />
-          <span onClick={onDelete} className="item-delete-icon material-icons">delete</span>
+          <IconButton onClick={onDelete} color="error">
+            <DeleteIcon />
+          </IconButton>
         </>
       ) : (
         <>
-          <kbd className="shortcut">{localShortcut}</kbd>
-          <span className="description">{localDescription}</span>
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            p: 0.5,
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            '&:last-child': {
+              borderBottom: 'none'
+            }
+          }}>
+            <Typography
+              component="kbd"
+              sx={{
+                bgcolor: 'grey.100',
+                p: '2px 6px',
+                borderRadius: 1,
+                fontFamily: 'JetBrains Mono, Consolas, monospace',
+                fontSize: '0.8rem'
+              }}
+            >
+              {shortcut}
+            </Typography>
+            <Typography
+              sx={{
+                color: 'text.secondary',
+                flex: 1
+              }}
+            >
+              {description}
+            </Typography>
+          </Box>
         </>
       )}
-    </div>
+    </Box>
   );
 };
 
