@@ -1,3 +1,4 @@
+/* Layout */
 .sidepanel {
   width: 100%;
   height: 100vh;
@@ -11,10 +12,11 @@
   overflow-y: auto;
 }
 
+/* Section */
 .section-card {
   background: #fff;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgb(0 0 0 / 10%);
   margin-bottom: 16px;
 }
 
@@ -36,176 +38,139 @@
   font-size: 16px;
   margin: 0;
   color: #333;
-  cursor: pointer;
 }
 
-.section-items {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.section-content {
   padding: 8px;
-}
-
-.shortcut-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px;
-  border-bottom: 1px solid #eee;
-}
-
-.shortcut-item:last-child {
-  border-bottom: none;
-}
-
-.shortcut {
-  background: #f5f5f5;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-family: monospace;
-  font-size: 12px;
-  border: 1px solid #ddd;
-}
-
-.description {
-  font-size: 14px;
-  color: #666;
-}
-
-.drop-indicator {
-  height: 2px;
-  background-color: blue;
-  margin: 2px 0;
-}
-
-.section-card {
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 16px;
-}
-
-.section-header {
-  background-color: #f8f8f8;
-  padding: 8px 12px;
-  border-bottom: 1px solid #ddd;
-  border-radius: 8px 8px 0 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.section-header:hover {
-  background-color: #f0f0f0;
-}
-
-.section-header h2 {
-  font-size: 16px;
-  margin: 0;
-  color: #333;
-  cursor: pointer;
-}
-
-.section-items {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 8px;
-}
-
-.shortcut-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px;
-  border-bottom: 1px solid #eee;
-}
-
-.shortcut-item:last-child {
-  border-bottom: none;
-}
-
-.shortcut {
-  background: #f5f5f5;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-family: monospace;
-  font-size: 12px;
-  border: 1px solid #ddd;
-}
-
-.description {
-  font-size: 14px;
-  color: #666;
-}
-
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 5px;
-  cursor: pointer;
-}
-
-.section-header .edit-actions {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  flex: 1;
-  justify-content: flex-end;
-}
-
-.section-header:hover .edit-icon {
-  visibility: visible;
-}
-
-.edit-icon {
-  visibility: hidden;
-  cursor: pointer;
-  margin-left: 5px;
-  font-size: 1.2em; /* Increase size */
-  color: #888; /* Improve visibility */
-}
-
-.save-icon,
-.cancel-icon {
-  cursor: pointer;
-  margin-left: 5px;
-  font-size: 1.2em;
-  color: #888;
-}
-
-.edit-buttons {
-  display: flex;
-  justify-content: flex-end;
-  padding: 5px;
-}
-
-.edit-buttons button {
-  margin-left: 5px;
 }
 
 .section-title-input {
-  font-size: 16px;
-  font-weight: normal;
-  color: #333;
-  border: none;
-  background-color: #f8f8f8;
-  padding: 8px 12px;
-  border-radius: 8px 8px 0 0;
-  margin: 0;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.shortcut-input,
-.description-input {
-  font-size: 14px;
-  color: #666;
+  padding: 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  padding: 4px 8px;
-  margin: 0;
-  width: 50%;
-  box-sizing: border-box;
+  font-size: 16px;
+  background: #fff;
+  width: 100%;
+  margin-right: 8px;
+}
+
+/* Section Controls */
+.section-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.section-header:hover .section-controls {
+  opacity: 1;
+}
+
+/* Items */
+.shortcut-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px;
+  border-bottom: 1px solid #eee;
+}
+
+.shortcut-item:last-child {
+  border-bottom: none;
+}
+
+.shortcut {
+  background: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+}
+
+.description {
+  color: #666;
+  flex: 1;
+}
+
+/* Item Controls */
+.shortcut-input,
+.description-input {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  background: #fff;
+}
+
+.shortcut-input {
+  width: 120px;
+}
+
+.description-input {
+  flex: 1;
+  margin: 0 8px;
+}
+
+.item-delete-icon.material-icons {
+  cursor: pointer;
+  color: #d32f2f; 
+  opacity: 0.6;
+  margin-left: 8px;
+  font-size: 18px;
+}
+
+.item-delete-icon.material-icons:hover {
+  opacity: 1;
+}
+
+/* Controls and Buttons */
+.control-button {
+  cursor: pointer;
+  margin-left: 8px;
+}
+
+.control-button:hover {
+  opacity: 1;
+}
+
+.control-button.material-icons {
+  opacity: 0.6;
+  font-size: 20px;
+}
+
+.control-button.material-icons:hover {
+  opacity: 1;
+}
+
+.control-button.delete-icon {
+  color: #d32f2f;
+}
+
+/* Add Buttons */
+.add-section-button,
+.add-item-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 16px;
+  padding: 8px 16px;
+  background: transparent;
+  border: 2px dashed #ccc;
+  border-radius: 4px;
+  color: #666;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.add-section-button:hover,
+.add-item-button:hover {
+  border-color: #999;
+  color: #333;
+}
+
+/* Material Icons */
+.material-icons {
+  font-size: 18px;
+  user-select: none;
 }

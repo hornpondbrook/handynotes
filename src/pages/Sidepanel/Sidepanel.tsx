@@ -6,7 +6,16 @@ import Section from './Section';
 import './styles.css';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 
+interface SidepanelState {
+  sections: Sections;
+  pendingSection: SectionType | null;
+}
+
 const Sidepanel: React.FC = () => {
+  const [state, setState] = useState<SidepanelState>({
+    sections: [],
+    pendingSection: null
+  });
   const [sections, setSections] = useState<Sections>([]);
 
   console.log("Sidepanel component rendered");
@@ -40,6 +49,55 @@ const Sidepanel: React.FC = () => {
     StorageUtils.setSections(newSections);
   };
 
+  const handleAddSection = () => {
+    const newSection: SectionType = {
+      id: `section-${Date.now()}`,
+      title: 'New Section',
+      items: [{
+        id: `item-${Date.now()}`,
+        shortcut: '',
+        description: ''
+      }],
+      isNew: true // Add this flag
+    };
+
+    setSections([...sections, newSection]);
+    StorageUtils.setSections([...sections, newSection]);
+  };
+
+  const handleSectionSave = (index: number, updatedSection: SectionType) => {
+    const savedSection = {
+      ...updatedSection,
+      isNew: false // Reset isNew flag when saving
+    };
+
+    if (state.pendingSection?.id === updatedSection.id) {
+      setState(prev => ({
+        sections: [...prev.sections, savedSection],
+        pendingSection: null
+      }));
+      StorageUtils.setSections([...state.sections, savedSection]);
+    } else {
+      handleSectionUpdate(index, savedSection);
+    }
+  };
+
+  const handleSectionCancel = (sectionId: string) => {
+    const section = sections.find(s => s.id === sectionId);
+    if (section?.isNew) {
+      const newSections = sections.filter(s => s.id !== sectionId);
+      setSections(newSections);
+      StorageUtils.setSections(newSections);
+    }
+  };
+
+  const handleSectionDelete = (sectionId: string) => {
+    const newSections = sections.filter(s => s.id !== sectionId);
+    setSections(newSections);
+    StorageUtils.setSections(newSections);
+  };
+
+
   useEffect(() => {
     const loadData = async () => {
       await StorageUtils.initializeStorage();
@@ -71,12 +129,24 @@ const Sidepanel: React.FC = () => {
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
                   >
-                    <Section section={section} index={index} onSectionUpdate={handleSectionUpdate} />
+                    <Section
+                      key={section.id}
+                      section={section}
+                      sectionIndex={index}
+                      onSectionUpdate={handleSectionSave}
+                      onCancel={() => handleSectionCancel(section.id)}
+                      onDelete={handleSectionDelete}
+                      initialEditMode={section.isNew} // Changed from title check to isNew flag
+                    />
                   </div>
                 )}
               </Draggable>
             ))}
             {provided.placeholder}
+            <button className="add-section-button" onClick={handleAddSection}>
+              <span className="material-icons">add_box</span>
+              Add Section
+            </button>
           </div>
         )}
       </Droppable>

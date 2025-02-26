@@ -1,16 +1,26 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Item from './Item';
 import { Section as SectionType } from '../../types';
 
 interface SectionProps {
   section: SectionType;
   sectionIndex: number;
-  onSectionUpdate: (index: number, updatedSection: SectionType) => void; // New prop
+  onSectionUpdate: (index: number, updatedSection: SectionType) => void;
+  onCancel: () => void;
+  onDelete: (id: string) => void;
+  initialEditMode?: boolean;
 }
 
-const Section: React.FC<SectionProps> = ({ section, sectionIndex, onSectionUpdate }) => {
+const Section: React.FC<SectionProps> = ({
+  section,
+  sectionIndex,
+  onSectionUpdate,
+  onCancel,
+  onDelete,  // Add onDelete to destructured props
+  initialEditMode = false
+}) => {
+  const [isEditing, setIsEditing] = useState(initialEditMode);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(section.title);
 
   const toggleCollapse = () => {
@@ -19,6 +29,7 @@ const Section: React.FC<SectionProps> = ({ section, sectionIndex, onSectionUpdat
 
   const handleEditClick = () => {
     setIsEditing(true);
+    setIsCollapsed(false); // Always expand when entering edit mode
   }
 
   const handleSaveClick = () => {
@@ -31,18 +42,51 @@ const Section: React.FC<SectionProps> = ({ section, sectionIndex, onSectionUpdat
   const handleCancelClick = () => {
     setIsEditing(false);
     setTitle(section.title);
+    onCancel(); // Call the onCancel prop
   };
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value);
   };
 
+  const handleAddItem = () => {
+    const newItem = {
+      id: `item-${Date.now()}`,
+      shortcut: '',
+      description: ''
+    };
+    const updatedSection = {
+      ...section,
+      items: [...section.items, newItem]
+    };
+    onSectionUpdate(sectionIndex, updatedSection);
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent collapse toggle
+    if (window.confirm('Are you sure you want to delete this section?')) {
+      onDelete(section.id);
+    }
+  };
+
+  const handleDeleteItem = (itemIndex: number) => {
+    const updatedItems = section.items.filter((_, index) => index !== itemIndex);
+    const updatedSection = { ...section, items: updatedItems };
+    onSectionUpdate(sectionIndex, updatedSection);
+  };
+
+  // Also add effect to prevent collapse in edit mode
+  useEffect(() => {
+    if (isEditing) {
+      setIsCollapsed(false);
+    }
+  }, [isEditing]);
+
   return (
     <div className="section-card">
       <div
         className="section-header"
         onClick={isEditing ? undefined : toggleCollapse}
-        title={isCollapsed ? "Click to expand" : "Click to collapse"}
       >
         {isEditing ? (
           <input
@@ -54,31 +98,22 @@ const Section: React.FC<SectionProps> = ({ section, sectionIndex, onSectionUpdat
         ) : (
           <h2>{section.title}</h2>
         )}
-        {isEditing ? (
-          <div className="edit-actions">
-            <span className="save-icon" onClick={handleSaveClick}>
-              ✓
-            </span>
-            <span className="cancel-icon" onClick={handleCancelClick}>
-              ✕
-            </span>
-          </div>
-        ) : (
-          <span
-            className="edit-icon"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleEditClick();
-            }}
-          >
-            ✎
-          </span>
-        )}
+        <div className="section-controls">
+          {isEditing ? (
+            <>
+              <span onClick={handleSaveClick} className="control-button material-icons">save</span>
+              <span onClick={handleCancelClick} className="control-button material-icons">close</span>
+            </>
+          ) : (
+            <>
+              <span onClick={handleEditClick} className="control-button material-icons">edit</span>
+              <span onClick={handleDeleteClick} className="control-button material-icons delete-icon">delete</span>
+            </>
+          )}
+        </div>
       </div>
-      {(!isCollapsed || isEditing) && (
-        <div
-          className="section-content"
-        >
+      {!isCollapsed && (
+        <div className="section-content">
           {section.items.map((item, index) => {
             const handleItemUpdate = (newShortcut: string, newDescription: string) => {
               const newItems = section.items.map((currentItem, i) => {
@@ -97,9 +132,16 @@ const Section: React.FC<SectionProps> = ({ section, sectionIndex, onSectionUpdat
                 description={item.description}
                 isEditing={isEditing}
                 onItemUpdate={handleItemUpdate}
+                onDelete={() => handleDeleteItem(index)} // Add delete handler
               />
             );
           })}
+          {isEditing && (
+            <button className="add-item-button" onClick={handleAddItem}>
+              <span className="material-icons">add</span>
+              Add Item
+            </button>
+          )}
         </div>
       )}
     </div>

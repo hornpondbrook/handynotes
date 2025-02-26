@@ -5,9 +5,10 @@ interface ItemProps {
   description: string;
   isEditing: boolean;
   onItemUpdate: (shortcut: string, description: string) => void;
+  onDelete: () => void;
 }
 
-const Item: React.FC<ItemProps> = ({ shortcut, description, isEditing, onItemUpdate }) => {
+const Item: React.FC<ItemProps> = ({ shortcut, description, isEditing, onItemUpdate, onDelete }) => {
   const [localShortcut, setLocalShortcut] = useState(shortcut);
   const [localDescription, setLocalDescription] = useState(description);
 
@@ -37,6 +38,7 @@ const Item: React.FC<ItemProps> = ({ shortcut, description, isEditing, onItemUpd
             value={localDescription}
             onChange={handleDescriptionChange}
           />
+          <span onClick={onDelete} className="item-delete-icon material-icons">delete</span>
         </>
       ) : (
         <>
