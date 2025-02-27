@@ -3,18 +3,33 @@ import { createTheme } from '@mui/material/styles';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#1976d2',
+      main: '#2196f3', // Bright blue
+      light: '#64b5f6',
+      dark: '#1976d2'
     },
     secondary: {
-      main: '#9c27b0',
+      main: '#ff4081', // Pink
+      light: '#ff79b0',
+      dark: '#c60055'
     },
     error: {
-      main: '#d32f2f',
+      main: '#f44336' // Red
+    },
+    warning: {
+      main: '#ffa726' // Orange
+    },
+    success: {
+      main: '#66bb6a' // Green
     },
     background: {
       default: '#f5f5f5',
-      paper: '#ffffff',
+      paper: '#ffffff'
     },
+    grey: {
+      100: '#f5f5f5',
+      200: '#e3f2fd', // Light blue background
+      300: '#bbdefb', // Hover state
+    }
   },
   typography: {
     fontFamily: [
@@ -25,9 +40,9 @@ const theme = createTheme({
       'Monaco',
       'monospace'
     ].join(','),
-    fontSize: 11,
+    fontSize: 10,
     h6: {
-      fontSize: '1rem',
+      fontSize: '0.8rem',
     },
   },
   shape: {
@@ -37,7 +52,13 @@ const theme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          padding: '4px 8px'
+          padding: '4px 8px',
+          '&.MuiIconButton-colorPrimary:hover': {
+            backgroundColor: 'rgba(33, 150, 243, 0.08)'
+          },
+          '&.MuiIconButton-colorError:hover': {
+            backgroundColor: 'rgba(244, 67, 54, 0.08)'
+          }
         }
       }
     },
@@ -52,9 +73,34 @@ const theme = createTheme({
       defaultProps: {
         size: 'small'
       }
+    },
+    MuiTableRow: {
+      styleOverrides: {
+        root: {
+          border: 'none',
+          '& > *': {
+            padding: '4px 2px',
+            '&:hover': {
+              backgroundColor: 'rgba(0, 0, 0, 0.04)'
+            },
+            transition: 'background-color 0.2s ease'
+          }
+        }
+      }
+    },
+    MuiTableCell: {
+      styleOverrides: {
+        root: {
+          padding: '4px 8px',
+          borderBottom: 'none'
+        },
+        sizeSmall: {
+          padding: '2px 4px'
+        }
+      }
     }
   },
-  spacing: 4,
+  spacing: 3,
 });
 
 export default theme;

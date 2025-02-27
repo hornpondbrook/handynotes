@@ -140,7 +140,7 @@ const Sidepanel: React.FC = () => {
                     <Box
                       ref={provided.innerRef}
                       {...provided.draggableProps}
-                      {...provided.dragHandleProps}
+                      // {...provided.dragHandleProps}
                       sx={{
                         border: 'none',
                         backgroundColor: 'transparent'
@@ -153,6 +153,7 @@ const Sidepanel: React.FC = () => {
                         onSectionUpdate={handleSectionSave}
                         onCancel={() => handleSectionCancel(section.id)}
                         onDelete={handleSectionDelete}
+                        provided={provided} // Pass provided prop
                         initialEditMode={section.isNew} // Changed from title check to isNew flag
                       />
                     </Box>

@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import Item from './Item';
 import { Section as SectionType } from '../../types';
 import { Box, IconButton, TextField, Button, Typography, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import { Table, TableHead, TableBody, TableRow, TableCell, TableContainer } from '@mui/material';
+
 import {
   Save as SaveIcon,
   Close as CloseIcon,
@@ -16,6 +18,7 @@ interface SectionProps {
   onSectionUpdate: (index: number, updatedSection: SectionType) => void;
   onCancel: () => void;
   onDelete: (id: string) => void;
+  provided: any; // Add provided prop
   initialEditMode?: boolean;
 }
 
@@ -25,6 +28,7 @@ const Section: React.FC<SectionProps> = ({
   onSectionUpdate,
   onCancel,
   onDelete,  // Add onDelete to destructured props
+  provided, // Destructure provided
   initialEditMode = false
 }) => {
   const [isEditing, setIsEditing] = useState(initialEditMode);
@@ -124,15 +128,16 @@ const Section: React.FC<SectionProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '6px 8px',
-            backgroundColor: 'background.default',
+            padding: '2px 4px',
+            backgroundColor: 'grey.200',
             borderBottom: '1px solid',
             borderColor: 'divider',
             cursor: isEditing ? 'default' : 'pointer',
             '&:hover': {
-              backgroundColor: 'action.hover'
+              backgroundColor: 'grey.300'
             }
           }}
+          {...provided.dragHandleProps} // Move drag handle props here
           onClick={isEditing ? undefined : toggleCollapse}
         >
           {isEditing ? (
@@ -150,14 +155,14 @@ const Section: React.FC<SectionProps> = ({
               }}
             />
           ) : (
-            <Typography variant="h6" component="h2" sx={{ fontSize: '0.875rem', lineHeight: 1.2 }}>
+            <Typography variant="h6" component="h2">
               {section.title}
             </Typography>
           )}
           <Box sx={{
             display: 'flex',
             gap: 0.5,
-            opacity: 0,
+            opacity: isEditing ? 1 : 0, // Always visible in edit mode
             transition: 'opacity 0.2s ease',
             '&:hover': {
               opacity: 1
@@ -186,29 +191,35 @@ const Section: React.FC<SectionProps> = ({
         </Box>
 
         {!isCollapsed && (
-          <Box sx={{ padding: 2 }}>
-            {section.items.map((item, index) => {
-              const handleItemUpdate = (newShortcut: string, newDescription: string) => {
-                const newItems = section.items.map((currentItem, i) => {
-                  if (i === index) {
-                    return { ...currentItem, shortcut: newShortcut, description: newDescription };
-                  }
-                  return currentItem;
-                });
-                const updatedSection = { ...section, items: newItems };
-                onSectionUpdate(sectionIndex, updatedSection);
-              };
-              return (
-                <Item
-                  key={item.id}
-                  shortcut={item.shortcut}
-                  description={item.description}
-                  isEditing={isEditing}
-                  onItemUpdate={handleItemUpdate}
-                  onDelete={() => handleDeleteItem(index)} // Add delete handler
-                />
-              );
-            })}
+          <Box sx={{ padding: 0 }}>
+            <TableContainer sx={{ mb: 4 }}>
+              <Table size="small" sx={{ width: "100%", tableLayout: "auto" }}>
+                <TableBody>
+                  {section.items.map((item, index) => {
+                    const handleItemUpdate = (newShortcut: string, newDescription: string) => {
+                      const newItems = section.items.map((currentItem, i) => {
+                        if (i === index) {
+                          return { ...currentItem, shortcut: newShortcut, description: newDescription };
+                        }
+                        return currentItem;
+                      });
+                      const updatedSection = { ...section, items: newItems };
+                      onSectionUpdate(sectionIndex, updatedSection);
+                    };
+                    return (
+                      <Item
+                        key={item.id}
+                        shortcut={item.shortcut}
+                        description={item.description}
+                        isEditing={isEditing}
+                        onItemUpdate={handleItemUpdate}
+                        onDelete={() => handleDeleteItem(index)} // Add delete handler
+                      />
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>
             {isEditing && (
               <Button
                 variant="outlined"

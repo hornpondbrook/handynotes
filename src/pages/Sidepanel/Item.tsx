@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, TextField, Chip, Typography, IconButton } from '@mui/material';
+import { Box, TextField, Chip, Typography, IconButton, TableRow, TableCell } from '@mui/material';
 import { Delete as DeleteIcon } from '@mui/icons-material';
 
 interface ItemProps {
@@ -25,78 +25,71 @@ const Item: React.FC<ItemProps> = ({ shortcut, description, isEditing, onItemUpd
   };
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 1,
-        p: 0.5,
-        borderBottom: '1px solid',
-        borderColor: 'divider',
-        '&:last-child': {
-          borderBottom: 'none'
-        }
-      }}
-    >
+    <TableRow>
       {isEditing ? (
         <>
-          <TextField
-            variant="outlined"
-            size="small"
-            value={localShortcut}
-            onChange={handleShortcutChange}
-            sx={{ width: 120 }}
-            placeholder="Shortcut"
-          />
-          <TextField
-            variant="outlined"
-            size="small"
-            value={localDescription}
-            onChange={handleDescriptionChange}
-            sx={{ flexGrow: 1 }}
-            placeholder="Description"
-          />
-          <IconButton onClick={onDelete} color="error">
-            <DeleteIcon />
-          </IconButton>
+          <TableCell size="small" sx={{ width: 'auto', whiteSpace: 'nowrap' }}>
+            <TextField
+              fullWidth
+              size="small"
+              value={localShortcut}
+              onChange={handleShortcutChange}
+              placeholder="Shortcut"
+            // sx={{ my: 0.5 }} // Add small vertical margin
+            />
+          </TableCell>
+          <TableCell>
+            <TextField
+              fullWidth
+              size="small"
+              value={localDescription}
+              onChange={handleDescriptionChange}
+              placeholder="Description"
+            />
+          </TableCell>
+          <TableCell padding="none">
+            <IconButton
+              onClick={onDelete}
+              color="error"
+              size="small"
+              sx={{
+                padding: '0px',
+                '& .MuiSvgIcon-root': {
+                  fontSize: '16px'
+                }
+              }}
+            >
+              <DeleteIcon />
+            </IconButton>
+          </TableCell>
         </>
       ) : (
         <>
-          <Box sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1,
-            p: 0.5,
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            '&:last-child': {
-              borderBottom: 'none'
-            }
-          }}>
+          <TableCell
+            size="small"
+            sx={{
+              bgcolor: 'grey.100',
+              borderRadius: 1,
+              whiteSpace: "nowrap", width: "auto"
+            }}>
             <Typography
               component="kbd"
               sx={{
-                bgcolor: 'grey.100',
-                p: '2px 6px',
-                borderRadius: 1,
-                fontFamily: 'JetBrains Mono, Consolas, monospace',
-                fontSize: '0.8rem'
+                fontFamily: 'JetBrains Mono, Consolas, monospace'
               }}
             >
               {shortcut}
             </Typography>
-            <Typography
-              sx={{
-                color: 'text.secondary',
-                flex: 1
-              }}
-            >
+          </TableCell>
+          <TableCell sx={{ width: '100%' }}>
+            <Typography color="text.secondary">
               {description}
             </Typography>
-          </Box>
+          </TableCell>
+          <TableCell padding="none" style={{ width: '0' }} />
         </>
       )}
-    </Box>
+    </TableRow>
   );
 };
 
