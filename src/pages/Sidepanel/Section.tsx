@@ -1,15 +1,14 @@
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, Table, TableBody, TableContainer, TextField, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import Item from './Item';
 import { Section as SectionType } from '../../types';
-import { Box, IconButton, TextField, Button, Typography, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
-import { Table, TableHead, TableBody, TableRow, TableCell, TableContainer } from '@mui/material';
+import Item from './Item';
 
 import {
-  Save as SaveIcon,
+  Add as AddIcon,
   Close as CloseIcon,
-  Edit as EditIcon,
   Delete as DeleteIcon,
-  Add as AddIcon
+  Edit as EditIcon,
+  Save as SaveIcon
 } from '@mui/icons-material';
 
 interface SectionProps {
@@ -39,30 +38,25 @@ const Section: React.FC<SectionProps> = ({
   const toggleCollapse = () => {
     setIsCollapsed(!isCollapsed);
   };
-
   const handleEditClick = () => {
     setIsEditing(true);
     setIsCollapsed(false); // Always expand when entering edit mode
   }
-
   const handleSaveClick = () => {
     setIsEditing(false);
     // Update the section title
     const updatedSection = { ...section, title: title };
     onSectionUpdate(sectionIndex, updatedSection);
   };
-
   const handleCancelClick = () => {
     setIsEditing(false);
     setTitle(section.title);
     onCancel(); // Call the onCancel prop
   };
-
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSectionTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value);
   };
-
-  const handleAddItem = () => {
+  const handleItemAdd = () => {
     const newItem = {
       id: `item-${Date.now()}`,
       shortcut: '',
@@ -74,25 +68,27 @@ const Section: React.FC<SectionProps> = ({
     };
     onSectionUpdate(sectionIndex, updatedSection);
   };
-
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent collapse toggle
     setDeleteDialogOpen(true);
   };
-
   const handleDeleteConfirm = () => {
     setDeleteDialogOpen(false);
     onDelete(section.id);
   };
-
   const handleDeleteCancel = () => {
     setDeleteDialogOpen(false);
   };
-
-  const handleDeleteItem = (itemIndex: number) => {
+  const handleItemDelete = (itemIndex: number) => {
     const updatedItems = section.items.filter((_, index) => index !== itemIndex);
     const updatedSection = { ...section, items: updatedItems };
     onSectionUpdate(sectionIndex, updatedSection);
+  };
+  const handleItemUpdate = (itemIndex: number, newShortcut: string, newDescription: string) => {
+    const newItems = section.items.map((item, index) =>
+      index === itemIndex ? { ...item, shortcut: newShortcut, description: newDescription } : item
+    );
+    onSectionUpdate(sectionIndex, { ...section, items: newItems });
   };
 
   // Also add effect to prevent collapse in edit mode
@@ -146,7 +142,7 @@ const Section: React.FC<SectionProps> = ({
               variant="outlined"
               size="small"
               value={title}
-              onChange={handleTitleChange}
+              onChange={handleSectionTitleChange}
               sx={{
                 marginRight: 2,
                 '& .MuiOutlinedInput-root': {
@@ -195,28 +191,18 @@ const Section: React.FC<SectionProps> = ({
             <TableContainer sx={{ mb: 4 }}>
               <Table size="small" sx={{ width: "100%", tableLayout: "auto" }}>
                 <TableBody>
-                  {section.items.map((item, index) => {
-                    const handleItemUpdate = (newShortcut: string, newDescription: string) => {
-                      const newItems = section.items.map((currentItem, i) => {
-                        if (i === index) {
-                          return { ...currentItem, shortcut: newShortcut, description: newDescription };
-                        }
-                        return currentItem;
-                      });
-                      const updatedSection = { ...section, items: newItems };
-                      onSectionUpdate(sectionIndex, updatedSection);
-                    };
-                    return (
-                      <Item
-                        key={item.id}
-                        shortcut={item.shortcut}
-                        description={item.description}
-                        isEditing={isEditing}
-                        onItemUpdate={handleItemUpdate}
-                        onDelete={() => handleDeleteItem(index)} // Add delete handler
-                      />
-                    );
-                  })}
+                  {section.items.map((item, index) => (
+                    <Item
+                      key={item.id}
+                      shortcut={item.shortcut}
+                      description={item.description}
+                      isEditing={isEditing}
+                      onItemUpdate={(newShortcut, newDescription) =>
+                        handleItemUpdate(index, newShortcut, newDescription)
+                      }
+                      onItemDelete={() => handleItemDelete(index)}
+                    />
+                  ))}
                 </TableBody>
               </Table>
             </TableContainer>
@@ -224,7 +210,7 @@ const Section: React.FC<SectionProps> = ({
               <Button
                 variant="outlined"
                 startIcon={<AddIcon />}
-                onClick={handleAddItem}
+                onClick={handleItemAdd}
                 sx={{
                   margin: 2,
                   borderStyle: 'dashed',

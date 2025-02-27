@@ -79,12 +79,12 @@ const theme = createTheme({
         root: {
           border: 'none',
           '& > *': {
-            padding: '4px 2px',
-            '&:hover': {
-              backgroundColor: 'rgba(0, 0, 0, 0.04)'
-            },
-            transition: 'background-color 0.2s ease'
-          }
+            padding: '4px 2px'
+          },
+          '&:hover': {
+            backgroundColor: 'rgba(33, 150, 243, 0.04)' // Light blue hover
+          },
+          transition: 'background-color 0.2s ease'
         }
       }
     },

@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
-import { Box, TextField, Chip, Typography, IconButton, TableRow, TableCell } from '@mui/material';
 import { Delete as DeleteIcon } from '@mui/icons-material';
+import { IconButton, TableCell, TableRow, TextField, Typography } from '@mui/material';
+import React, { useState } from 'react';
 
 interface ItemProps {
   shortcut: string;
   description: string;
   isEditing: boolean;
   onItemUpdate: (shortcut: string, description: string) => void;
-  onDelete: () => void;
+  onItemDelete: () => void;
 }
 
-const Item: React.FC<ItemProps> = ({ shortcut, description, isEditing, onItemUpdate, onDelete }) => {
+const Item: React.FC<ItemProps> = ({ shortcut, description, isEditing, onItemUpdate, onItemDelete }) => {
   const [localShortcut, setLocalShortcut] = useState(shortcut);
   const [localDescription, setLocalDescription] = useState(description);
 
@@ -18,7 +18,6 @@ const Item: React.FC<ItemProps> = ({ shortcut, description, isEditing, onItemUpd
     setLocalShortcut(e.target.value);
     onItemUpdate(e.target.value, localDescription);
   };
-
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLocalDescription(e.target.value);
     onItemUpdate(localShortcut, e.target.value);
@@ -49,7 +48,7 @@ const Item: React.FC<ItemProps> = ({ shortcut, description, isEditing, onItemUpd
           </TableCell>
           <TableCell padding="none">
             <IconButton
-              onClick={onDelete}
+              onClick={onItemDelete}
               color="error"
               size="small"
               sx={{
@@ -70,7 +69,8 @@ const Item: React.FC<ItemProps> = ({ shortcut, description, isEditing, onItemUpd
             sx={{
               bgcolor: 'grey.100',
               borderRadius: 1,
-              whiteSpace: "nowrap", width: "auto"
+              whiteSpace: "nowrap", width: "auto",
+              paddingRight: 2,
             }}>
             <Typography
               component="kbd"
@@ -81,7 +81,10 @@ const Item: React.FC<ItemProps> = ({ shortcut, description, isEditing, onItemUpd
               {shortcut}
             </Typography>
           </TableCell>
-          <TableCell sx={{ width: '100%' }}>
+          <TableCell sx={{
+            width: '100%',
+            paddingLeft: 2,
+          }}>
             <Typography color="text.secondary">
               {description}
             </Typography>

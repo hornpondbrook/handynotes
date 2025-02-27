@@ -1,13 +1,13 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { AddBox as AddBoxIcon } from '@mui/icons-material';
+import { Box, Button } from '@mui/material';
+import { ThemeProvider } from '@mui/material/styles';
+import React, { useEffect, useState } from 'react';
+import { DragDropContext, Draggable, Droppable, DropResult } from 'react-beautiful-dnd';
+import { initializeInitialSections } from '../../data/initialData';
+import theme from '../../theme';
 import { Sections, Section as SectionType } from '../../types';
 import { StorageUtils } from '../../utils/storage';
-import { initializeInitialSections } from '../../data/initialData';
 import Section from './Section';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
-import { AddBox as AddBoxIcon } from '@mui/icons-material';
-import { ThemeProvider } from '@mui/material/styles';
-import { Box, Button } from '@mui/material';
-import theme from '../../theme';
 
 interface SidepanelState {
   sections: Sections;
@@ -21,9 +21,7 @@ const Sidepanel: React.FC = () => {
   });
   const [sections, setSections] = useState<Sections>([]);
 
-  console.log("Sidepanel component rendered");
-
-  const onDragEnd = (result: DropResult) => {
+  const handleSectionIndexChange = (result: DropResult) => {
     // dropped outside the list
     if (!result.destination) {
       return;
@@ -38,7 +36,6 @@ const Sidepanel: React.FC = () => {
     setSections(items);
     StorageUtils.setSections(items);
   };
-
   const handleSectionUpdate = (index: number, updatedSection: SectionType) => {
     console.log("handleSectionUpdate called", index, updatedSection);
     console.log("sections before update", sections);
@@ -51,8 +48,7 @@ const Sidepanel: React.FC = () => {
     setSections(newSections);
     StorageUtils.setSections(newSections);
   };
-
-  const handleAddSection = () => {
+  const handleSectionAdd = () => {
     const newSection: SectionType = {
       id: `section-${Date.now()}`,
       title: 'New Section',
@@ -67,7 +63,6 @@ const Sidepanel: React.FC = () => {
     setSections([...sections, newSection]);
     StorageUtils.setSections([...sections, newSection]);
   };
-
   const handleSectionSave = (index: number, updatedSection: SectionType) => {
     const savedSection = {
       ...updatedSection,
@@ -84,7 +79,6 @@ const Sidepanel: React.FC = () => {
       handleSectionUpdate(index, savedSection);
     }
   };
-
   const handleSectionCancel = (sectionId: string) => {
     const section = sections.find(s => s.id === sectionId);
     if (section?.isNew) {
@@ -93,14 +87,11 @@ const Sidepanel: React.FC = () => {
       StorageUtils.setSections(newSections);
     }
   };
-
   const handleSectionDelete = (sectionId: string) => {
     const newSections = sections.filter(s => s.id !== sectionId);
     setSections(newSections);
     StorageUtils.setSections(newSections);
   };
-
-
   useEffect(() => {
     const loadData = async () => {
       await StorageUtils.initializeStorage();
@@ -116,7 +107,7 @@ const Sidepanel: React.FC = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <DragDropContext onDragEnd={onDragEnd}>
+      <DragDropContext onDragEnd={handleSectionIndexChange}>
         <Droppable droppableId="sections">
           {(provided) => (
             <Box
@@ -164,7 +155,7 @@ const Sidepanel: React.FC = () => {
               <Button
                 variant="outlined"
                 startIcon={<AddBoxIcon />}
-                onClick={handleAddSection}
+                onClick={handleSectionAdd}
                 sx={{
                   margin: 2,
                   borderStyle: 'dashed',
