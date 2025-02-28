@@ -11,6 +11,8 @@ interface ItemProps {
 }
 
 const Item: React.FC<ItemProps> = ({ shortcut, description, isEditing, onItemUpdate, onItemDelete }) => {
+  console.log('Item render:', { shortcut, description, isEditing });
+
   const [localShortcut, setLocalShortcut] = useState(shortcut);
   const [localDescription, setLocalDescription] = useState(description);
 
@@ -33,8 +35,13 @@ const Item: React.FC<ItemProps> = ({ shortcut, description, isEditing, onItemUpd
               size="small"
               value={localShortcut}
               onChange={handleShortcutChange}
-              placeholder="Shortcut"
-            // sx={{ my: 0.5 }} // Add small vertical margin
+              placeholder="Enter shortcut" // Add placeholder
+              sx={{
+                '& .MuiInputBase-input::placeholder': {
+                  opacity: 0.7,
+                  fontStyle: 'italic'
+                }
+              }}
             />
           </TableCell>
           <TableCell>
@@ -43,7 +50,13 @@ const Item: React.FC<ItemProps> = ({ shortcut, description, isEditing, onItemUpd
               size="small"
               value={localDescription}
               onChange={handleDescriptionChange}
-              placeholder="Description"
+              placeholder="Enter description" // Add placeholder
+              sx={{
+                '& .MuiInputBase-input::placeholder': {
+                  opacity: 0.7,
+                  fontStyle: 'italic'
+                }
+              }}
             />
           </TableCell>
           <TableCell padding="none">
@@ -78,7 +91,7 @@ const Item: React.FC<ItemProps> = ({ shortcut, description, isEditing, onItemUpd
                 fontFamily: 'JetBrains Mono, Consolas, monospace'
               }}
             >
-              {shortcut}
+              {shortcut || "No shortcut"} {/* Show default if empty */}
             </Typography>
           </TableCell>
           <TableCell sx={{
@@ -86,7 +99,7 @@ const Item: React.FC<ItemProps> = ({ shortcut, description, isEditing, onItemUpd
             paddingLeft: 2,
           }}>
             <Typography color="text.secondary">
-              {description}
+              {description || "No description"} {/* Show default if empty */}
             </Typography>
           </TableCell>
           <TableCell padding="none" style={{ width: '0' }} />
@@ -97,3 +110,10 @@ const Item: React.FC<ItemProps> = ({ shortcut, description, isEditing, onItemUpd
 };
 
 export default Item;
+// export default React.memo(Item, (prevProps, nextProps) => {
+//   return (
+//     prevProps.shortcut === nextProps.shortcut &&
+//     prevProps.description === nextProps.description &&
+//     prevProps.isEditing === nextProps.isEditing
+//   );
+// });

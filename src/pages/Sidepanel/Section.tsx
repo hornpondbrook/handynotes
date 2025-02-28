@@ -1,5 +1,5 @@
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, Table, TableBody, TableContainer, TextField, Typography } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Section as SectionType } from '../../types';
 import Item from './Item';
 
@@ -14,42 +14,48 @@ import {
 interface SectionProps {
   section: SectionType;
   sectionIndex: number;
+  isEditing: boolean;
   onSectionEdit: (index: number) => void;
   onSectionUpdate: (index: number, updatedSection: SectionType) => void;
   onSectionSave: (index: number, updatedSection: SectionType) => void;
   onSectionCancel: (index: number) => void;
   onSectionDelete: (id: string) => void;
   provided: any;
-  initialEditMode?: boolean;
 }
 
 const Section: React.FC<SectionProps> = ({
   section,
   sectionIndex,
+  isEditing, // Replace initialEditMode
   onSectionEdit,
   onSectionUpdate,
   onSectionSave,
   onSectionCancel,
   onSectionDelete,
-  provided,
-  initialEditMode = false
+  provided
 }) => {
-  const [isEditing, setIsEditing] = useState(initialEditMode);
+  console.log('Section render:', section.id, section.items);
+
+  // const [isEditing, setIsEditing] = useState(initialEditMode);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [title, setTitle] = useState(section.title);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  useEffect(() => {
+    console.log('Section items updated:', section.id, section.items);
+  }, [section.items]);
 
   const toggleCollapse = () => {
     setIsCollapsed(!isCollapsed);
   };
   const handleEditClick = () => {
-    setIsEditing(true);
+    // setIsEditing(true);
     setIsCollapsed(false); // Always expand when entering edit mode
     onSectionEdit(sectionIndex);
     // console.log('Editing section:', sectionIndex, section); // Add logging
   }
   const handleSaveClick = () => {
-    setIsEditing(false);
+    // setIsEditing(false);
     // Update the section title
     const updatedSection = {
       ...section,
@@ -60,7 +66,7 @@ const Section: React.FC<SectionProps> = ({
     onSectionSave(sectionIndex, updatedSection);
   };
   const handleCancelClick = () => {
-    setIsEditing(false);
+    // setIsEditing(false);
     setTitle(section.title);
     // Reset any item changes by restoring from preSection
     onSectionCancel(sectionIndex);
@@ -91,16 +97,34 @@ const Section: React.FC<SectionProps> = ({
   const handleDeleteCancel = () => {
     setDeleteDialogOpen(false);
   };
-  const handleItemDelete = (itemIndex: number) => {
-    const updatedItems = section.items.filter((_, index) => index !== itemIndex);
-    const updatedSection = { ...section, items: updatedItems };
-    onSectionUpdate(sectionIndex, updatedSection);
-  };
+  // const handleItemDelete = (itemId: string) => {
+  //   // console.log('Deleting item:', itemIndex); // Add logging
+  //   // const updatedItems = section.items.filter((_, index) => index !== itemIndex);
+  //   // const updatedSection = { ...section, items: updatedItems };
+  //   // onSectionUpdate(sectionIndex, updatedSection);
+  //   console.log('Deleting item:', itemId, section.items);
+  //   // Use index-based removal instead of filter
+  //   const newItems = section.items.filter(item => item.id !== itemId);
+  //   console.log('newItems:', newItems);
+  //   const updatedSection = { ...section, items: newItems };
+  //   onSectionUpdate(sectionIndex, updatedSection);
+  // };
+
+  const handleItemDelete = useCallback((itemId: string) => {
+    console.log('Deleting item:', itemId);
+    onSectionUpdate(sectionIndex, {
+      ...section,
+      items: section.items.filter(item => item.id !== itemId)
+    });
+  }, [section, sectionIndex, onSectionUpdate]);
+
   const handleItemUpdate = (itemIndex: number, newShortcut: string, newDescription: string) => {
+    console.log('Updating item:', itemIndex, newShortcut, newDescription);
     const newItems = section.items.map((item, index) =>
       index === itemIndex ? { ...item, shortcut: newShortcut, description: newDescription } : item
     );
     const updatedSection = { ...section, items: newItems };
+    console.log('Updating item: Updated section:', updatedSection);
     onSectionUpdate(sectionIndex, updatedSection);
     // onSectionUpdate(sectionIndex, { ...section, items: newItems });
   };
@@ -205,18 +229,24 @@ const Section: React.FC<SectionProps> = ({
             <TableContainer sx={{ mb: 4 }}>
               <Table size="small" sx={{ width: "100%", tableLayout: "auto" }}>
                 <TableBody key={sectionIndex}>
-                  {section.items.map((item, index) => (
-                    <Item
-                      key={`${section.id}-${item.id}-${index}`}
-                      shortcut={item.shortcut}
-                      description={item.description}
-                      isEditing={isEditing}
-                      onItemUpdate={(newShortcut, newDescription) =>
-                        handleItemUpdate(index, newShortcut, newDescription)
-                      }
-                      onItemDelete={() => handleItemDelete(index)}
-                    />
-                  ))}
+                  {section.items.map((item, index) => {
+                    // console.log('item.map:', `${section.id}-${item.id}`, index, section.items);
+                    return (
+                      <Item
+                        key={`${section.id}-${item.id}`}
+                        shortcut={item.shortcut}
+                        description={item.description}
+                        isEditing={isEditing}
+                        onItemUpdate={(newShortcut, newDescription) =>
+                          handleItemUpdate(index, newShortcut, newDescription)
+                        }
+                        onItemDelete={() => {
+                          // console.log('Deleting item from handler:', `${section.id}-${item.id}`, index, section.items);
+                          handleItemDelete(item.id)
+                        }}
+                      />
+                    );
+                  })}
                 </TableBody>
               </Table>
             </TableContainer>
@@ -265,4 +295,10 @@ const Section: React.FC<SectionProps> = ({
   );
 };
 
-export default React.memo(Section);
+export default Section;
+// export default React.memo(Section, (prevProps, nextProps) => {
+//   return (
+//     prevProps.section === nextProps.section &&
+//     prevProps.isEditing === nextProps.isEditing
+//   );
+// });

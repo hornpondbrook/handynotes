@@ -92,13 +92,13 @@ export const initializeInitialSections = async (): Promise<Sections> => {
       const itemData = sectionData.items[j];
       const itemId = await StorageUtils.generateItemId();
       items.push({
-        id: itemId,
+        id: j.toString(), //itemId,
         shortcut: itemData.key,
         description: itemData.desc
       });
     }
     sections.push({
-      id: sectionId,
+      id: i.toString(), //sectionId,
       title: sectionData.title,
       items: items
     });
