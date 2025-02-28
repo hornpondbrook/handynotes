@@ -14,20 +14,24 @@ import {
 interface SectionProps {
   section: SectionType;
   sectionIndex: number;
+  onSectionEdit: (index: number) => void;
   onSectionUpdate: (index: number, updatedSection: SectionType) => void;
-  onCancel: () => void;
-  onDelete: (id: string) => void;
-  provided: any; // Add provided prop
+  onSectionSave: (index: number, updatedSection: SectionType) => void;
+  onSectionCancel: (index: number) => void;
+  onSectionDelete: (id: string) => void;
+  provided: any;
   initialEditMode?: boolean;
 }
 
 const Section: React.FC<SectionProps> = ({
   section,
   sectionIndex,
+  onSectionEdit,
   onSectionUpdate,
-  onCancel,
-  onDelete,  // Add onDelete to destructured props
-  provided, // Destructure provided
+  onSectionSave,
+  onSectionCancel,
+  onSectionDelete,
+  provided,
   initialEditMode = false
 }) => {
   const [isEditing, setIsEditing] = useState(initialEditMode);
@@ -41,17 +45,25 @@ const Section: React.FC<SectionProps> = ({
   const handleEditClick = () => {
     setIsEditing(true);
     setIsCollapsed(false); // Always expand when entering edit mode
+    onSectionEdit(sectionIndex);
+    // console.log('Editing section:', sectionIndex, section); // Add logging
   }
   const handleSaveClick = () => {
     setIsEditing(false);
     // Update the section title
-    const updatedSection = { ...section, title: title };
-    onSectionUpdate(sectionIndex, updatedSection);
+    const updatedSection = {
+      ...section,
+      title: title,
+      items: section.items.map(item => ({ ...item })) // Deep copy items
+    };
+    console.log('Saving from section:', updatedSection); // Add logging
+    onSectionSave(sectionIndex, updatedSection);
   };
   const handleCancelClick = () => {
     setIsEditing(false);
     setTitle(section.title);
-    onCancel(); // Call the onCancel prop
+    // Reset any item changes by restoring from preSection
+    onSectionCancel(sectionIndex);
   };
   const handleSectionTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value);
@@ -74,7 +86,7 @@ const Section: React.FC<SectionProps> = ({
   };
   const handleDeleteConfirm = () => {
     setDeleteDialogOpen(false);
-    onDelete(section.id);
+    onSectionDelete(section.id);
   };
   const handleDeleteCancel = () => {
     setDeleteDialogOpen(false);
@@ -88,7 +100,9 @@ const Section: React.FC<SectionProps> = ({
     const newItems = section.items.map((item, index) =>
       index === itemIndex ? { ...item, shortcut: newShortcut, description: newDescription } : item
     );
-    onSectionUpdate(sectionIndex, { ...section, items: newItems });
+    const updatedSection = { ...section, items: newItems };
+    onSectionUpdate(sectionIndex, updatedSection);
+    // onSectionUpdate(sectionIndex, { ...section, items: newItems });
   };
 
   // Also add effect to prevent collapse in edit mode
@@ -190,10 +204,10 @@ const Section: React.FC<SectionProps> = ({
           <Box sx={{ padding: 0 }}>
             <TableContainer sx={{ mb: 4 }}>
               <Table size="small" sx={{ width: "100%", tableLayout: "auto" }}>
-                <TableBody>
+                <TableBody key={sectionIndex}>
                   {section.items.map((item, index) => (
                     <Item
-                      key={item.id}
+                      key={`${section.id}-${item.id}-${index}`}
                       shortcut={item.shortcut}
                       description={item.description}
                       isEditing={isEditing}

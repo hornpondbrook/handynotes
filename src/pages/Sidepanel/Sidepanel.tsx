@@ -9,17 +9,25 @@ import { Sections, Section as SectionType } from '../../types';
 import { StorageUtils } from '../../utils/storage';
 import Section from './Section';
 
-interface SidepanelState {
-  sections: Sections;
-  pendingSection: SectionType | null;
-}
-
 const Sidepanel: React.FC = () => {
-  const [state, setState] = useState<SidepanelState>({
-    sections: [],
-    pendingSection: null
-  });
   const [sections, setSections] = useState<Sections>([]);
+  const [preSection, setPreSection] = useState<{ index: number, section: SectionType } | null>(null);
+
+
+  const handleSectionEdit = (index: number) => {
+    const section = sections[index];
+    setPreSection({
+      index,
+      section: JSON.parse(JSON.stringify(section)) // Deep copy
+    });
+    // console.log('Editing section:', index, section); // Add logging
+    console.log('Editing section: preSection=', preSection); // Add logging
+  };
+
+  // Add effect to monitor preSection changes
+  useEffect(() => {
+    console.log('preSection changed:', preSection);
+  }, [preSection]);
 
   const handleSectionIndexChange = (result: DropResult) => {
     // dropped outside the list
@@ -36,18 +44,6 @@ const Sidepanel: React.FC = () => {
     setSections(items);
     StorageUtils.setSections(items);
   };
-  const handleSectionUpdate = (index: number, updatedSection: SectionType) => {
-    console.log("handleSectionUpdate called", index, updatedSection);
-    console.log("sections before update", sections);
-    const newSections = [...sections];
-    newSections[index] = {
-      ...updatedSection,
-      items: updatedSection.items.map(item => ({ ...item }))
-    };
-    console.log("sections after update", newSections);
-    setSections(newSections);
-    StorageUtils.setSections(newSections);
-  };
   const handleSectionAdd = () => {
     const newSection: SectionType = {
       id: `section-${Date.now()}`,
@@ -57,35 +53,43 @@ const Sidepanel: React.FC = () => {
         shortcut: '',
         description: ''
       }],
-      isNew: true // Add this flag
     };
 
     setSections([...sections, newSection]);
-    StorageUtils.setSections([...sections, newSection]);
+    // StorageUtils.setSections([...sections, newSection]);
   };
   const handleSectionSave = (index: number, updatedSection: SectionType) => {
-    const savedSection = {
-      ...updatedSection,
-      isNew: false // Reset isNew flag when saving
-    };
-
-    if (state.pendingSection?.id === updatedSection.id) {
-      setState(prev => ({
-        sections: [...prev.sections, savedSection],
-        pendingSection: null
-      }));
-      StorageUtils.setSections([...state.sections, savedSection]);
-    } else {
-      handleSectionUpdate(index, savedSection);
-    }
+    console.log('Saving section:', updatedSection); // Add logging
+    const newSections = [...sections];
+    newSections[index] = updatedSection;
+    setSections(newSections);
+    setPreSection(null);
+    StorageUtils.setSections(newSections);
   };
-  const handleSectionCancel = (sectionId: string) => {
-    const section = sections.find(s => s.id === sectionId);
-    if (section?.isNew) {
-      const newSections = sections.filter(s => s.id !== sectionId);
-      setSections(newSections);
-      StorageUtils.setSections(newSections);
+
+  const handleSectionUpdate = (index: number, updatedSection: SectionType) => {
+    console.log('Updating section:', updatedSection); // Add logging
+    const newSections = [...sections];
+    newSections[index] = updatedSection;
+    setSections(newSections);
+  }
+
+  const handleSectionCancel = (index: number) => {
+    console.log('Cancelling section: preSection=', preSection); // Add logging
+    console.log('Cancelling section: index=', index); // Add logging
+    console.log('Cancelling section: sections=', sections); // Add logging
+    if (!preSection) return;
+
+    const newSections = [...sections];
+    if (preSection.section) {
+      newSections[index] = preSection.section;
+    } else {
+      // Remove newly added section
+      newSections.splice(index, 1);
     }
+    console.log('Cancelling section: newSections=', newSections); // Add logging
+    setSections(newSections);
+    setPreSection(null);
   };
   const handleSectionDelete = (sectionId: string) => {
     const newSections = sections.filter(s => s.id !== sectionId);
@@ -104,6 +108,11 @@ const Sidepanel: React.FC = () => {
     };
     loadData();
   }, []);
+
+  // Add effect to handle storage updates
+  useEffect(() => {
+    StorageUtils.setSections(sections);
+  }, [sections]);
 
   return (
     <ThemeProvider theme={theme}>
@@ -141,11 +150,13 @@ const Sidepanel: React.FC = () => {
                         key={section.id}
                         section={section}
                         sectionIndex={index}
-                        onSectionUpdate={handleSectionSave}
-                        onCancel={() => handleSectionCancel(section.id)}
-                        onDelete={handleSectionDelete}
+                        onSectionEdit={handleSectionEdit}
+                        onSectionUpdate={handleSectionUpdate}
+                        onSectionSave={handleSectionSave}
+                        onSectionCancel={() => handleSectionCancel(index)}
+                        onSectionDelete={handleSectionDelete}
                         provided={provided} // Pass provided prop
-                        initialEditMode={section.isNew} // Changed from title check to isNew flag
+                        initialEditMode={preSection !== null && preSection.section.id === section.id}
                       />
                     </Box>
                   )}
