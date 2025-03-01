@@ -1,28 +1,27 @@
 import { Delete as DeleteIcon } from '@mui/icons-material';
 import { IconButton, TableCell, TableRow, TextField, Typography } from '@mui/material';
 import React, { useState } from 'react';
+import { ItemModel } from '../../types';
 
 interface ItemProps {
-  shortcut: string;
-  description: string;
+  item: ItemModel;
   isEditing: boolean;
-  onItemUpdate: (shortcut: string, description: string) => void;
-  onItemDelete: () => void;
+  onUpdate: (item: ItemModel) => void;
+  onDelete: () => void;
 }
 
-const Item: React.FC<ItemProps> = ({ shortcut, description, isEditing, onItemUpdate, onItemDelete }) => {
-  console.log('Item render:', { shortcut, description, isEditing });
+const Item: React.FC<ItemProps> = ({ item, isEditing, onUpdate, onDelete }) => {
 
-  const [localShortcut, setLocalShortcut] = useState(shortcut);
-  const [localDescription, setLocalDescription] = useState(description);
+  const [localShortcut, setLocalShortcut] = useState(item.shortcut);
+  const [localDescription, setLocalDescription] = useState(item.description);
 
   const handleShortcutChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLocalShortcut(e.target.value);
-    onItemUpdate(e.target.value, localDescription);
+    onUpdate({ ...item, shortcut: e.target.value });
   };
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLocalDescription(e.target.value);
-    onItemUpdate(localShortcut, e.target.value);
+    onUpdate({ ...item, description: e.target.value });
   };
 
   return (
@@ -61,7 +60,7 @@ const Item: React.FC<ItemProps> = ({ shortcut, description, isEditing, onItemUpd
           </TableCell>
           <TableCell padding="none">
             <IconButton
-              onClick={onItemDelete}
+              onClick={onDelete}
               color="error"
               size="small"
               sx={{
@@ -91,7 +90,7 @@ const Item: React.FC<ItemProps> = ({ shortcut, description, isEditing, onItemUpd
                 fontFamily: 'JetBrains Mono, Consolas, monospace'
               }}
             >
-              {shortcut || "No shortcut"} {/* Show default if empty */}
+              {item.shortcut || "No shortcut"} {/* Show default if empty */}
             </Typography>
           </TableCell>
           <TableCell sx={{
@@ -99,7 +98,7 @@ const Item: React.FC<ItemProps> = ({ shortcut, description, isEditing, onItemUpd
             paddingLeft: 2,
           }}>
             <Typography color="text.secondary">
-              {description || "No description"} {/* Show default if empty */}
+              {item.description || "No description"} {/* Show default if empty */}
             </Typography>
           </TableCell>
           <TableCell padding="none" style={{ width: '0' }} />
@@ -110,10 +109,4 @@ const Item: React.FC<ItemProps> = ({ shortcut, description, isEditing, onItemUpd
 };
 
 export default Item;
-// export default React.memo(Item, (prevProps, nextProps) => {
-//   return (
-//     prevProps.shortcut === nextProps.shortcut &&
-//     prevProps.description === nextProps.description &&
-//     prevProps.isEditing === nextProps.isEditing
-//   );
-// });
+

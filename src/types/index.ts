@@ -1,13 +1,13 @@
-export interface ShortcutItem {
+export interface SectionModel {
+  id: string;
+  title: string;
+  items: ItemModel[];
+}
+
+export interface ItemModel {
   id: string;
   shortcut: string;
   description: string;
 }
 
-export interface Section {
-  id: string;
-  title: string;
-  items: ShortcutItem[];
-}
-
-export type Sections = Section[];
+export type SectionsModel = SectionModel[];

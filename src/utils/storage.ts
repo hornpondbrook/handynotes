@@ -1,4 +1,4 @@
-import { Section, Sections } from '../types';
+import { SectionModel, Sections } from '../types';
 
 export class StorageUtils {
   private static readonly STORAGE_KEY = 'handynote_sections';
@@ -27,7 +27,7 @@ export class StorageUtils {
     await chrome.storage.local.set({ [this.STORAGE_KEY]: sections });
   }
 
-  static async addSection(section: Section): Promise<void> {
+  static async addSection(section: SectionModel): Promise<void> {
     const sections = await this.getSections();
     sections.push(section);
     await this.setSections(sections);
@@ -35,7 +35,7 @@ export class StorageUtils {
     await chrome.storage.local.set({ [this.HIGHEST_SECTION_INDEX_KEY]: highestSectionIndex + 1 });
   }
 
-  static async updateSection(sectionId: string, updatedSection: Section): Promise<void> {
+  static async updateSection(sectionId: string, updatedSection: SectionModel): Promise<void> {
     const sections = await this.getSections();
     const index = sections.findIndex(s => s.id === sectionId);
     if (index !== -1) {

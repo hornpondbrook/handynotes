@@ -1,4 +1,4 @@
-import { Sections, ShortcutItem } from '../types';
+import { Sections, ItemModel } from '../types';
 import { StorageUtils } from '../utils/storage';
 
 export const initializeInitialSections = async (): Promise<Sections> => {
@@ -87,7 +87,7 @@ export const initializeInitialSections = async (): Promise<Sections> => {
   for (let i = 0; i < initialData.length; i++) {
     const sectionData = initialData[i];
     const sectionId = await StorageUtils.generateSectionId(sectionData.title);
-    let items: ShortcutItem[] = [];
+    let items: ItemModel[] = [];
     for (let j = 0; j < sectionData.items.length; j++) {
       const itemData = sectionData.items[j];
       const itemId = await StorageUtils.generateItemId();

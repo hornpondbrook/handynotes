@@ -3,61 +3,57 @@ import { Box, Button } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
 import React, { useEffect, useState } from 'react';
 import { DragDropContext, Draggable, Droppable, DropResult } from 'react-beautiful-dnd';
-import { initializeInitialSections } from '../../data/initialData';
 import theme from '../../theme';
-import { Sections, Section as SectionType } from '../../types';
 import { StorageUtils } from '../../utils/storage';
+import { initializeInitialSections } from '../../data/initialData';
+import { SectionsModel, SectionModel } from '../../types';
 import Section from './Section';
 
+
 const Sidepanel: React.FC = () => {
-  console.log('Sidepanel render');
+  const [sections, setSections] = useState<SectionsModel>([]);
+  const [preSection, setPreSection] = useState<{ index: number, section: SectionModel | null } | null>(null);
 
-  const [sections, setSections] = useState<Sections>([]);
-  const [preSection, setPreSection] = useState<{ index: number, section: SectionType | null } | null>(null);
-
+  // Add effect to load data from storage
   useEffect(() => {
-    console.log('Sections updated:', sections);
+    const loadData = async () => {
+      await StorageUtils.initializeStorage();
+      let data = await StorageUtils.getSections();
+      if (data.length === 0) {
+        data = await initializeInitialSections();
+        await StorageUtils.setSections(data);
+      }
+      setSections(data);
+    };
+    loadData();
+  }, []);
+
+  // Add effect to handle storage updates
+  useEffect(() => {
+    // console.log('Sidepanel storage update:', sections);
+    StorageUtils.setSections(sections);
   }, [sections]);
 
-  useEffect(() => {
-    console.log('PreSection updated:', preSection);
-  }, [preSection]);
-
-  const handleSectionEdit = (index: number) => {
-    console.log('handleSectionEdit called:', { index });
-    const section = sections[index];
-    setPreSection({
-      index,
-      section: JSON.parse(JSON.stringify(section)) // Deep copy
-    });
-    // console.log('Editing section:', index, section); // Add logging
-    // console.log('Editing section: preSection=', preSection); // Add logging
-  };
-
-  const handleSectionIndexChange = (result: DropResult) => {
+  const handleSectionMove = (result: DropResult) => {
     // dropped outside the list
     if (!result.destination) {
       return;
     }
 
-    const items = Array.from(sections);
+    const sectionArray = Array.from(sections);
     const sourceIndex = result.source.index;
     const destinationIndex = result.destination.index;
-    const [reorderedItem] = items.splice(sourceIndex, 1);
-    items.splice(destinationIndex, 0, reorderedItem);
+    const [reorderedItem] = sectionArray.splice(sourceIndex, 1);
+    sectionArray.splice(destinationIndex, 0, reorderedItem);
 
-    setSections(items);
-    StorageUtils.setSections(items);
+    setSections(sectionArray);
   };
+
   const handleSectionAdd = () => {
-    const newSection: SectionType = {
+    const newSection: SectionModel = {
       id: `section-${Date.now()}`,
       title: 'New Section',
-      items: [{
-        id: `item-${Date.now()}`,
-        shortcut: '',
-        description: ''
-      }]
+      items: [{ id: `item-${Date.now()}`, shortcut: '', description: '' }]
     };
 
     // Use functional update pattern to ensure we're working with latest state
@@ -73,71 +69,53 @@ const Sidepanel: React.FC = () => {
       return updatedSections;
     });
   };
-  const handleSectionSave = (index: number, updatedSection: SectionType) => {
-    console.log('handleSectionSave called:', { index, updatedSection });
-    const newSections = [...sections];
-    newSections[index] = updatedSection;
-    setSections(newSections);
-    setPreSection(null);
-    StorageUtils.setSections(newSections);
-  };
 
-  const handleSectionUpdate = (index: number, updatedSection: SectionType) => {
-    console.log('handleSectionUpdate called:', { index, updatedSection });
-    const newSections = [...sections];
-    newSections[index] = updatedSection;
+  const handleSectionUpdate = (updatedSection: SectionModel) => {
+    const newSections = sections.map(s => {
+      if (s.id === updatedSection.id) {
+        return { ...s, ...updatedSection };
+      }
+      return s;
+    });
     setSections(newSections);
   }
 
-  const handleSectionCancel = (index: number) => {
-    console.log('handleSectionCancel called:', { index, preSection });
-    // console.log('Cancelling section: preSection=', preSection); // Add logging
-    // console.log('Cancelling section: index=', index); // Add logging
-    // console.log('Cancelling section: sections=', sections); // Add logging
-    if (!preSection) return;
+  const handleSectionEditStart = (id: string) => {
+    const section = sections.find(s => s.id === id);
+    if (section) {
+      setPreSection({
+        index: sections.findIndex(s => s.id === id),
+        section: JSON.parse(JSON.stringify(section))
+      });
+    }
+  };
 
+  const handleSectionEditSave = (id: string) => {
+    setPreSection(null);
+  };
+
+  const handleSectionEditCancel = (id: string) => {
+    if (!preSection) return;
     const newSections = [...sections];
     if (preSection.section) {
-      newSections[index] = preSection.section;
+      newSections[preSection.index] = preSection.section;
     } else {
-      // Remove newly added section
-      newSections.splice(index, 1);
+      newSections.splice(preSection.index, 1);
     }
-    // console.log('Cancelling section: newSections=', newSections); // Add logging
     setSections(newSections);
     setPreSection(null);
   };
-  const handleSectionDelete = (sectionId: string) => {
-    console.log('handleSectionDelete called:', sectionId);
-    const newSections = sections.filter(s => s.id !== sectionId);
+
+  const handleSectionDelete = (id: string) => {
+    const newSections = sections.filter(s => s.id !== id);
     setSections(newSections);
-    StorageUtils.setSections(newSections);
   };
 
-  useEffect(() => {
-    const loadData = async () => {
-      await StorageUtils.initializeStorage();
-      let data = await StorageUtils.getSections();
-      if (data.length === 0) {
-        data = await initializeInitialSections();
-
-        console.log('Setting initial data:', data);
-
-        await StorageUtils.setSections(data);
-      }
-      setSections(data);
-    };
-    loadData();
-  }, []);
-
-  // Add effect to handle storage updates
-  useEffect(() => {
-    StorageUtils.setSections(sections);
-  }, [sections]);
 
   return (
+
     <ThemeProvider theme={theme}>
-      <DragDropContext onDragEnd={handleSectionIndexChange}>
+      <DragDropContext onDragEnd={handleSectionMove}>
         <Droppable droppableId="sections">
           {(provided) => (
             <Box
@@ -170,14 +148,14 @@ const Sidepanel: React.FC = () => {
                       <Section
                         key={section.id}
                         section={section}
-                        sectionIndex={index}
+                        index={index}
                         isEditing={preSection?.index === index}
-                        onSectionEdit={handleSectionEdit}
-                        onSectionUpdate={handleSectionUpdate}
-                        onSectionSave={handleSectionSave}
-                        onSectionCancel={() => handleSectionCancel(index)}
-                        onSectionDelete={handleSectionDelete}
                         provided={provided} // Pass provided prop
+                        onEditing={handleSectionEditStart}
+                        onUpdate={handleSectionUpdate}
+                        onDelete={handleSectionDelete}
+                        onSave={handleSectionEditSave}
+                        onCancel={handleSectionEditCancel}
                       />
                     </Box>
                   )}
@@ -208,4 +186,4 @@ const Sidepanel: React.FC = () => {
   );
 };
 
-export default React.memo(Sidepanel);
+export default Sidepanel;
