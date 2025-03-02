@@ -10,7 +10,7 @@
     "storage"
   ],
   "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'; font-src 'self' https://fonts.gstatic.com;"
+    "extension_pages": "script-src 'self' http://localhost:8097; script-src 'self'; object-src 'self'; font-src 'self' https://fonts.gstatic.com;"
   },
   "background": {
     "service_worker": "background.bundle.js"

@@ -175,6 +175,15 @@ var options = {
       filename: 'sidepanel.html',
       chunks: ['sidepanel'],
       cache: false,
+      // templateParameters: {
+      //   reactDevTools: isDevelopment ? `
+      //     <script>
+      //       if (typeof window.__REACT_DEVTOOLS_GLOBAL_HOOK__ === 'object') {
+      //         __REACT_DEVTOOLS_GLOBAL_HOOK__.inject = function() {};
+      //       }
+      //     </script>
+      //   ` : ''
+      // }
     }),
   ].filter(Boolean),
   infrastructureLogging: {
