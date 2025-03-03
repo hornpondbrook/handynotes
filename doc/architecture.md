@@ -2,111 +2,225 @@
 
 ## generation prompt
 
+--- ask
+
+please review recent changes happened mostly in src/pages/Sidepanel and tests work done, then check existing architecture.md file, please add new materials and update existing knowledge in the file to reflect update to state architecture of the project, including design, workflwo, data flow, event flow, methodology, naming, tests and flow chart if necessary
+
+--- response
+
+After reviewing the changes in the Sidepanel component and tests, I'll update the architecture.md file to reflect the current state of the project.
+
+# Architecture Document
+
+## Overview
+
+HandyNote is a Chrome extension that provides a convenient way to store and manage keyboard shortcuts and notes within the browser. The extension is built using React and TypeScript, with Material-UI for styling.
+
 ## Project Structure
 
 ```
 handynote.react/
-├── doc/
-│   └── architecture.md
 ├── src/
-│   ├── assets/
-│   │   └── img/
-│   │       ├── icon16.png
-│   │       ├── icon48.png
-│   │       └── icon128.png
-│   ├── data/
-│   │   └── initialData.ts    # Initial data for sections and shortcuts
-│   ├── pages/
-│   │   ├── Background/
-│   │   │   └── index.ts         # Service worker for handling extension events
-│   │   └── Sidepanel/
-│   │       ├── index.html
-│   │       ├── index.tsx        # Entry point for side panel
-│   │       ├── Sidepanel.tsx    # Main side panel component
-│   │       └── styles.css       # Side panel styles
-│   ├── types/
-│   │   └── index.ts           # TypeScript type definitions
-│   ├── utils/
-│   │   └── storage.ts         # Utility functions for storage operations
-│   └── manifest.json            # Extension manifest v3
-├── webpack.config.js            # Build configuration
-└── package.json
+│   ├── components/          # Shared components
+│   ├── data/                # Initial data and constants
+│   ├── pages/               # Extension pages
+│   │   ├── Sidepanel/       # Sidepanel implementation
+│   │   │   ├── __tests__/   # Tests for Sidepanel components
+│   │   │   ├── Item.tsx     # Individual shortcut item
+│   │   │   ├── Section.tsx  # Section containing items
+│   │   │   └── Sidepanel.tsx # Main component
+│   ├── types/               # TypeScript type definitions
+│   └── utils/               # Utility functions
+│       └── storage.ts       # Chrome storage utilities
+├── public/                  # Static assets
+├── .github/                 # GitHub workflow configurations
+└── dist/                    # Build output
 ```
 
-## Key Components
+## Component Architecture
 
-### Background Service Worker
+### Component Hierarchy
 
-*   Located in `src/pages/Background/index.ts`
-*   Handles extension icon click events
-*   Controls side panel behavior
-*   Uses Chrome's native side panel API
+```
+Sidepanel
+└── Section (draggable)
+    └── Item
+```
 
-### Side Panel
+### Component Responsibilities
 
-*   Main UI component located in `src/pages/Sidepanel/`
-*   Built with React and TypeScript
-*   Uses native Chrome side panel functionality
-*   Styled using CSS modules
-*   Loads and displays sections and shortcuts from local storage
+1. **Sidepanel**:
+   - Main container component
+   - Manages sections state
+   - Handles section CRUD operations
+   - Implements drag-and-drop for section reordering
+   - Persists data to Chrome storage
 
-### Storage Utils
+2. **Section**:
+   - Displays section title and items
+   - Manages edit mode for itself
+   - Handles collapsing/expanding (future feature)
+   - Contains delete confirmation dialog
+   - Manages items within the section
 
-*   Located in `src/utils/storage.ts`
-*   Provides utility functions for CRUD operations on sections and shortcuts
-*   Uses Chrome's `chrome.storage.local` API to store data
-*   Generates unique IDs for sections and shortcuts
+3. **Item**:
+   - Displays shortcut and description
+   - Supports edit mode for modification
+   - Handles deletion
 
-### Data Initialization
+## Data Flow
 
-*   Located in `src/data/initialData.ts`
-*   Provides initial data for sections and shortcuts
-*   Exports an `initializeInitialSections` function that generates the initial data with unique IDs
+1. **Data Loading**:
+   - On mount, Sidepanel loads data from Chrome storage
+   - If storage is empty, initializes with default data
+   - Sets local state with loaded data
 
-### TypeScript Types
+2. **Data Modifications**:
+   - User actions (add, edit, delete) update React state
+   - State changes trigger storage updates
+   - Changes persist between browser sessions
 
-*   Located in `src/types/index.ts`
-*   Defines the TypeScript types for sections and shortcuts
+3. **Section Editing**:
+   - Edit mode is controlled by Sidepanel component
+   - Pre-edit state is stored to support cancellation
+   - Cancellation reverts to pre-edit state without storage update
+   - Save confirms changes and updates storage
 
-### Build System
+## State Management
 
-*   Uses Webpack for bundling
-*   TypeScript support
-*   Hot Module Replacement for development
-*   Outputs to `build/` directory
+1. **Component State**:
+   - React's useState for local component state
+   - Sidepanel maintains the source of truth for sections data
+   - Section component manages its own collapse state and edit mode
+   - Item component manages its own edit state
 
-## Chrome APIs Used
+2. **Storage**:
+   - Chrome's storage.local API for persistence
+   - StorageUtils abstracts storage operations
+   - Keys are defined as constants for consistency
 
-*   `chrome.sidePanel`: Native side panel API
-*   `chrome.action`: Extension icon click handling
-*   `chrome.storage`: For storing user data
+## Event Flow
 
-## Design Considerations
+1. **User Interactions**:
+   - Direct manipulation through UI controls
+   - Click events for editing, saving, canceling, deleting
+   - Drag-and-drop for section reordering
 
-*   **ID Generation:**
-    *   Sections are given IDs in the format `title-index`, where `title` is a URL-friendly version of the section title and `index` is a unique integer.
-    *   Items are given IDs that are unique integers.
-    *   The `StorageUtils` class maintains the highest section index and highest item index in local storage to ensure that IDs are never reused, even after deletion.
-*   **Data Initialization:**
-    *   The `initialData.ts` file exports an `initializeInitialSections` function that generates the initial data with unique IDs.
-    *   This function is called when the sidepanel is loaded, if there are no sections in local storage.
+2. **Event Handling**:
+   - Events are handled at the component level
+   - Callbacks are passed down from parent to child components
+   - State updates trigger re-renders and potentially storage updates
 
-## Implementation Details
+## Testing Strategy
 
-*   The `StorageUtils` class provides the following methods:
-    *   `initializeStorage`: Initializes the local storage with the initial data and the highest section/item indexes.
-    *   `getSections`: Retrieves the sections from local storage.
-    *   `setSections`: Stores the sections in local storage.
-    *   `addSection`: Adds a new section to local storage.
-    *   `updateSection`: Updates an existing section in local storage.
-    *   `deleteSection`: Deletes a section from local storage.
-    *   `generateSectionId`: Generates a unique ID for a section.
-    *   `generateItemId`: Generates a unique ID for an item.
-*   The `Sidepanel` component in `src/pages/Sidepanel/Sidepanel.tsx` uses the `StorageUtils` class to load and display the sections and shortcuts.
+1. **Unit Testing**:
+   - Jest as the test runner
+   - React Testing Library for component testing
+   - Tests isolated components with mock props and functions
 
-## Future Considerations
+2. **Component Testing**:
+   - Test rendering in different states (view/edit mode)
+   - Test user interactions (click, change, dragdrop)
+   - Test state updates and callback invocations
 
-*   State management implementation
-*   Error boundaries
-*   Unit testing setup
-*   Theme support
+3. **Test Organization**:
+   - Tests located alongside components in __tests__ directories
+   - Test files named with .test.tsx extension
+   - Mock implementation of dependencies (react-beautiful-dnd, storage)
+
+4. **Testing Methodology**:
+   - Arrange-Act-Assert pattern
+   - Mock external dependencies
+   - Use query methods to verify rendered output
+   - Simulate user interactions with fireEvent
+   - Use waitFor for asynchronous operations
+
+5. **Testing Coverage**:
+   - Rendering tests for UI verification
+   - Interaction tests for event handling
+   - State change tests for logic verification
+   - Error handling tests for robustness (planned)
+   - Persistence tests for storage operations
+
+## Future Features
+
+1. **Collapsed Section Persistence**:
+   - Store collapsed state in Chrome storage
+   - Restore collapsed state on page load
+   - Tests already in place (currently skipped)
+
+2. **Error Handling Improvements**:
+   - Graceful recovery from storage failures
+   - User feedback for error conditions
+   - Tests already in place (currently skipped)
+
+3. **Keyboard Shortcuts**:
+   - Add keyboard navigation
+   - Implement shortcuts for common actions
+   - Tests already in place (currently skipped)
+
+## Development Workflow
+
+1. **Development Environment**:
+   - Use PORT=6002 npm run start for development server
+   - Use npx react-devtools for component inspection
+
+2. **Debugging**:
+   - React DevTools integration for component inspection
+   - Chrome DevTools for extension debugging
+   - Console logging for development feedback
+
+3. **Testing**:
+   - Run tests with npm test
+   - Add new tests for new features
+   - Update tests when modifying existing features
+
+## Design Principles
+
+1. **Component Composition**:
+   - Small, focused components with single responsibilities
+   - Props as the API for component communication
+   - Controlled components for form elements
+
+2. **State Management**:
+   - Single source of truth for important data
+   - Push state up to common ancestor when needed
+   - Local component state when possible
+
+3. **Naming Conventions**:
+   - PascalCase for component names
+   - camelCase for variables and functions
+   - BEM-like naming for CSS classes
+   - Descriptive names for handlers (handleSectionEdit, handleItemDelete)
+
+4. **Code Organization**:
+   - Logical grouping of related components
+   - Clear separation of concerns
+   - Import dependencies in consistent order
+
+## Flow Chart: Data and Event Flow
+
+```
+User Action → Component Event Handler → State Update → Re-render → Storage Update
+     ↑                                                    |
+     └────────────────────────────────────────────────────┘
+                          (UI updates)
+```
+
+## Storage Architecture
+
+1. **Keys**:
+   - STORAGE_KEY: 'handynote_sections'
+   - HIGHEST_SECTION_INDEX_KEY: 'handynote_highest_section_index'
+   - HIGHEST_ITEM_INDEX_KEY: 'handynote_highest_item_index'
+   - (Future) COLLAPSED_SECTIONS_KEY: 'handynote_collapsed_sections'
+
+2. **Data Structure**:
+   - Sections array with nested items
+   - Each section and item has unique ID
+   - IDs are used for targeting operations and state management
+
+3. **Operations**:
+   - getSections(): Load all sections
+   - setSections(sections): Save all sections
+   - Other utility methods for specific operations
