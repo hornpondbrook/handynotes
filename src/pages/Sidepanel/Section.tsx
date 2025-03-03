@@ -174,11 +174,13 @@ const Section: React.FC<SectionProps> = ({
             {isEditing ? (
               <>
                 <IconButton
+                  aria-label="save" // Add aria-label
                   onClick={handleSaveClick}
                   color="primary" sx={{ '& svg': { fontSize: 20 } }}>
                   <SaveIcon />
                 </IconButton>
                 <IconButton
+                  aria-label="cancel" // Add aria-label
                   onClick={handleCancelClick}
                   color="error" sx={{ '& svg': { fontSize: 20 } }}>
                   <CloseIcon />
@@ -187,11 +189,13 @@ const Section: React.FC<SectionProps> = ({
             ) : (
               <>
                 <IconButton
+                  aria-label="edit" // Add aria-label
                   onClick={handleEditClick}
                   color="primary" sx={{ '& svg': { fontSize: 20 } }}>
                   <EditIcon />
                 </IconButton>
                 <IconButton
+                  aria-label="delete" // Add aria-label
                   onClick={handleDeleteClick}
                   color="error" sx={{ '& svg': { fontSize: 20 } }}>
                   <DeleteIcon />
@@ -261,11 +265,13 @@ const Section: React.FC<SectionProps> = ({
           </DialogContent>
           <DialogActions>
             <Button
+              aria-label="cancel" // Add aria-label
               onClick={handleDeleteCancel}
               color="primary">
               Cancel
             </Button>
             <Button
+              aria-label="confirm" // Add aria-label
               onClick={handleDeleteConfirm}
               color="error" variant="contained">
               Delete

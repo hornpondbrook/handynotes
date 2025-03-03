@@ -60,6 +60,7 @@ const Item: React.FC<ItemProps> = ({ item, isEditing, onUpdate, onDelete }) => {
           </TableCell>
           <TableCell padding="none">
             <IconButton
+              aria-label="delete"
               onClick={onDelete}
               color="error"
               size="small"

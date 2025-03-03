@@ -107,6 +107,7 @@ const Sidepanel: React.FC = () => {
   };
 
   const handleSectionDelete = (id: string) => {
+    console.log('Delete section:', id);
     const newSections = sections.filter(s => s.id !== id);
     setSections(newSections);
   };

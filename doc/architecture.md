@@ -1,5 +1,7 @@
 # HandyNote Chrome Extension Architecture
 
+## generation prompt
+
 ## Project Structure
 
 ```
