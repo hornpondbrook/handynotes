@@ -1,4 +1,4 @@
-import { SectionModel, Sections } from '../types';
+import { SectionModel, SectionsModel } from '../types';
 
 export class StorageUtils {
   private static readonly STORAGE_KEY = 'handynote_sections';
@@ -18,12 +18,12 @@ export class StorageUtils {
     }
   }
 
-  static async getSections(): Promise<Sections> {
+  static async getSections(): Promise<SectionsModel> {
     const result = await chrome.storage.local.get(this.STORAGE_KEY);
     return result[this.STORAGE_KEY] || [];
   }
 
-  static async setSections(sections: Sections): Promise<void> {
+  static async setSections(sections: SectionsModel): Promise<void> {
     await chrome.storage.local.set({ [this.STORAGE_KEY]: sections });
   }
 

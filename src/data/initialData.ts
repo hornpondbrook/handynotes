@@ -1,7 +1,7 @@
-import { Sections, ItemModel } from '../types';
+import { SectionsModel, ItemModel } from '../types';
 import { StorageUtils } from '../utils/storage';
 
-export const initializeInitialSections = async (): Promise<Sections> => {
+export const initializeInitialSections = async (): Promise<SectionsModel> => {
   const initialData = [
     //   {
     //     title: "VS Code Shortcuts - General",
@@ -83,7 +83,7 @@ export const initializeInitialSections = async (): Promise<Sections> => {
     }
   ];
 
-  let sections: Sections = [];
+  let sections: SectionsModel = [];
   for (let i = 0; i < initialData.length; i++) {
     const sectionData = initialData[i];
     const sectionId = await StorageUtils.generateSectionId(sectionData.title);
