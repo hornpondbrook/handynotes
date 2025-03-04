@@ -40,6 +40,8 @@ const Section: React.FC<SectionProps> = ({
   const [title, setTitle] = useState(section.title);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
+  console.log(`${Date.now()} SECTION ${section.id} rendering`);
+
   const toggleCollapse = () => {
     setIsCollapsed(!isCollapsed);
   };
@@ -284,3 +286,20 @@ const Section: React.FC<SectionProps> = ({
 };
 
 export default Section;
+
+// Export memoized version
+// export default React.memo(Section, (prevProps, nextProps) => {
+//   console.log(`${Date.now()} MEMO compare for section ${prevProps.section.id}:`, {
+//     prevProps,
+//     nextProps,
+//     areEqual: prevProps.section === nextProps.section
+//   });
+//   // Return true if props are equal (no re-render needed)
+//   return (
+//     prevProps.section.id === nextProps.section.id &&
+//     prevProps.section.title === nextProps.section.title &&
+//     prevProps.section.items === nextProps.section.items &&
+//     prevProps.index === nextProps.index &&
+//     prevProps.isEditing === nextProps.isEditing
+//   );
+// });

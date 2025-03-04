@@ -14,11 +14,14 @@ const Sidepanel: React.FC = () => {
   const [sections, setSections] = useState<SectionsModel>([]);
   const [preSection, setPreSection] = useState<{ index: number, section: SectionModel | null } | null>(null);
 
+  console.log(`${Date.now()} SIDEPANEL rendering ${sections.length} sections`);
+
   // Add effect to load data from storage
   useEffect(() => {
     const loadData = async () => {
       await StorageUtils.initializeStorage();
       let data = await StorageUtils.getSections();
+      console.log(`${Date.now()} STORAGE loaded ${data.length} sections`);
       if (data.length === 0) {
         data = await initializeInitialSections();
         await StorageUtils.setSections(data);
@@ -29,9 +32,26 @@ const Sidepanel: React.FC = () => {
   }, []);
 
   // Add effect to handle storage updates
+  // useEffect(() => {
+  //   console.log(`${Date.now()} STORAGE updates ${sections.length} sections`);
+  //   StorageUtils.setSections(sections);
+  // }, [sections]);
+
+  // Add unload effect
   useEffect(() => {
-    // console.log('Sidepanel storage update:', sections);
-    StorageUtils.setSections(sections);
+    const handleUnload = () => {
+      StorageUtils.setSections(sections);
+    };
+
+    // Call handleUnload on page refresh or exit
+    // console.log(`${Date.now()} SESSION updated ${JSON.stringify(sections)}`);
+    window.addEventListener('beforeunload', handleUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleUnload);
+      // Save on unmount as well
+      handleUnload();
+    };
   }, [sections]);
 
   const handleSectionMove = (result: DropResult) => {
@@ -51,9 +71,9 @@ const Sidepanel: React.FC = () => {
 
   const handleSectionAdd = () => {
     const newSection: SectionModel = {
-      id: `section-${Date.now()}`,
+      id: `s${Date.now()}`,
       title: 'New Section',
-      items: [{ id: `item-${Date.now()}`, shortcut: '', description: '' }]
+      items: [{ id: `i${Date.now()}`, shortcut: '', description: '' }]
     };
 
     // Use functional update pattern to ensure we're working with latest state
@@ -65,6 +85,8 @@ const Sidepanel: React.FC = () => {
         index: updatedSections.length - 1,
         section: null
       });
+
+      console.log(`${Date.now()} ADD Section to ${updatedSections}`);
 
       return updatedSections;
     });
@@ -91,6 +113,8 @@ const Sidepanel: React.FC = () => {
   };
 
   const handleSectionEditSave = (id: string) => {
+    // Reset sections to trigger save to storage
+    setSections([...sections]);
     setPreSection(null);
   };
 
@@ -107,8 +131,10 @@ const Sidepanel: React.FC = () => {
   };
 
   const handleSectionDelete = (id: string) => {
-    console.log('Delete section:', id);
+    console.log(`${Date.now()} DELETE section ${id}`);
+    // console.log(`${Date.now()} DELETE before ${sections.length} sections`);
     const newSections = sections.filter(s => s.id !== id);
+    // console.log(`${Date.now()} DELETE after ${newSections.length} sections`);
     setSections(newSections);
   };
 
@@ -135,7 +161,7 @@ const Sidepanel: React.FC = () => {
               ref={provided.innerRef}
             >
               {sections.map((section, index) => (
-                <Draggable key={section.id} draggableId={`${section.id}-${index}`} index={index}>
+                <Draggable key={section.id} draggableId={section.id} index={index}>
                   {(provided) => (
                     <Box
                       ref={provided.innerRef}
@@ -147,7 +173,7 @@ const Sidepanel: React.FC = () => {
                       }}
                     >
                       <Section
-                        key={section.id}
+                        // key={section.id}
                         section={section}
                         index={index}
                         isEditing={preSection?.index === index}

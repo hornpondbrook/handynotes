@@ -10,10 +10,14 @@
   "scripts": {
     "build": "node utils/build.js",
     "start": "node utils/webserver.js",
+    "dev": "PORT=6002 npm run start",
     "prettier": "prettier --write '**/*.{js,jsx,ts,tsx,json,css,scss,md}'",
+    "lint": "eslint --ext .ts,.tsx src/",
     "lint:css": "stylelint \"src/**/*.css\" --fix",
+    "lint:fix": "eslint --ext .ts,.tsx src/ --fix",
     "test": "jest --config jest.config.js",
-    "test:watch": "jest --watch --config jest.config.js"
+    "test:watch": "jest --watch --config jest.config.js",
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

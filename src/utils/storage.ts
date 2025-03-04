@@ -20,35 +20,37 @@ export class StorageUtils {
 
   static async getSections(): Promise<SectionsModel> {
     const result = await chrome.storage.local.get(this.STORAGE_KEY);
+    console.log(`${Date.now()} getSections: ${JSON.stringify(result)}`);
     return result[this.STORAGE_KEY] || [];
   }
 
   static async setSections(sections: SectionsModel): Promise<void> {
     await chrome.storage.local.set({ [this.STORAGE_KEY]: sections });
+    console.log(`${Date.now()} setSections: ${JSON.stringify(sections)}`);
   }
 
-  static async addSection(section: SectionModel): Promise<void> {
-    const sections = await this.getSections();
-    sections.push(section);
-    await this.setSections(sections);
-    const highestSectionIndex = await this.getHighestSectionIndex();
-    await chrome.storage.local.set({ [this.HIGHEST_SECTION_INDEX_KEY]: highestSectionIndex + 1 });
-  }
+  // static async addSection(section: SectionModel): Promise<void> {
+  //   const sections = await this.getSections();
+  //   sections.push(section);
+  //   await this.setSections(sections);
+  //   const highestSectionIndex = await this.getHighestSectionIndex();
+  //   await chrome.storage.local.set({ [this.HIGHEST_SECTION_INDEX_KEY]: highestSectionIndex + 1 });
+  // }
 
-  static async updateSection(sectionId: string, updatedSection: SectionModel): Promise<void> {
-    const sections = await this.getSections();
-    const index = sections.findIndex(s => s.id === sectionId);
-    if (index !== -1) {
-      sections[index] = updatedSection;
-      await this.setSections(sections);
-    }
-  }
+  // static async updateSection(sectionId: string, updatedSection: SectionModel): Promise<void> {
+  //   const sections = await this.getSections();
+  //   const index = sections.findIndex(s => s.id === sectionId);
+  //   if (index !== -1) {
+  //     sections[index] = updatedSection;
+  //     await this.setSections(sections);
+  //   }
+  // }
 
-  static async deleteSection(sectionId: string): Promise<void> {
-    const sections = await this.getSections();
-    const filtered = sections.filter(s => s.id !== sectionId);
-    await this.setSections(filtered);
-  }
+  // static async deleteSection(sectionId: string): Promise<void> {
+  //   const sections = await this.getSections();
+  //   const filtered = sections.filter(s => s.id !== sectionId);
+  //   await this.setSections(filtered);
+  // }
 
   static async getHighestSectionIndex(): Promise<number> {
     const result = await chrome.storage.local.get(this.HIGHEST_SECTION_INDEX_KEY);

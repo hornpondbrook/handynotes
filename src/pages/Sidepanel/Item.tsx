@@ -15,6 +15,8 @@ const Item: React.FC<ItemProps> = ({ item, isEditing, onUpdate, onDelete }) => {
   const [localShortcut, setLocalShortcut] = useState(item.shortcut);
   const [localDescription, setLocalDescription] = useState(item.description);
 
+  // console.log(`${Date.now()} ITEM ${item.shortcut} rendering`);
+
   const handleShortcutChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLocalShortcut(e.target.value);
     onUpdate({ ...item, shortcut: e.target.value });
@@ -110,4 +112,13 @@ const Item: React.FC<ItemProps> = ({ item, isEditing, onUpdate, onDelete }) => {
 };
 
 export default Item;
+
+// export default React.memo(Item, (prevProps, nextProps) => {
+//   return (
+//     prevProps.item.id === nextProps.item.id &&
+//     prevProps.item.shortcut === nextProps.item.shortcut &&
+//     prevProps.item.description === nextProps.item.description &&
+//     prevProps.isEditing === nextProps.isEditing
+//   );
+// });
 
