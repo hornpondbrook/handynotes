@@ -3,35 +3,36 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import Section from '../Section';
 import { SectionModel } from '../../../types';
 
-describe('Section component', () => {
-  const mockSection: SectionModel = {
-    id: 'section-1',
-    title: 'Test Section',
-    items: [
-      { id: 'item-1', shortcut: 'ctrl+a', description: 'Select all' },
-      { id: 'item-2', shortcut: 'ctrl+c', description: 'Copy' }
-    ]
-  };
+const mockSection: SectionModel = {
+  id: 'section-1',
+  title: 'Test Section',
+  items: [
+    { id: 'item-1', shortcut: 'ctrl+a', description: 'Select all' },
+    { id: 'item-2', shortcut: 'ctrl+c', description: 'Copy' }
+  ]
+};
 
-  const mockProps = {
-    section: mockSection,
-    index: 0,
-    isEditing: false,
-    onEditing: jest.fn(),
-    onUpdate: jest.fn(),
-    onDelete: jest.fn(),
-    onSave: jest.fn(),
-    onCancel: jest.fn(),
-    provided: {}
-  };
+const mockProps = {
+  section: mockSection,
+  index: 0,
+  isEditing: false,
+  onEditing: jest.fn(),
+  onUpdate: jest.fn(),
+  onDelete: jest.fn(),
+  onSave: jest.fn(),
+  onCancel: jest.fn(),
+  provided: {}
+};
+
+const renderSection = (props = mockProps) => {
+  return render(<Section {...props} />);
+};
+
+describe('Section component', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
-
-  const renderSection = (props = mockProps) => {
-    return render(<Section {...props} />);
-  };
 
   test('renders section title', () => {
     renderSection();
@@ -136,5 +137,104 @@ describe('Section component', () => {
         { id: expect.any(String), shortcut: '', description: '' }
       ]
     });
+  });
+});
+
+describe('Section validation', () => {
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('shows validation errors when saving with empty title', () => {
+    renderSection({ ...mockProps, isEditing: true });
+    const titleInput = screen.getByDisplayValue('Test Section');
+    fireEvent.change(titleInput, { target: { value: '' } });
+
+    const saveButton = screen.getByRole('button', { name: /save/i });
+    fireEvent.click(saveButton);
+
+    expect(screen.getByText('Title cannot be empty')).toBeInTheDocument();
+    expect(mockProps.onSave).not.toHaveBeenCalled();
+  });
+
+  test('shows validation errors when saving with duplicate shortcuts', () => {
+    const sectionWithDuplicates = {
+      ...mockSection,
+      items: [
+        { id: 'item-1', shortcut: 'ctrl+a', description: 'First' },
+        { id: 'item-2', shortcut: 'ctrl+a', description: 'Second' }
+      ]
+    };
+
+    renderSection({ ...mockProps, section: sectionWithDuplicates, isEditing: true });
+    const saveButton = screen.getByRole('button', { name: /save/i });
+    fireEvent.click(saveButton);
+
+    expect(screen.getByText('Shortcut is a duplicate of item at position 1')).toBeInTheDocument();
+    expect(mockProps.onSave).not.toHaveBeenCalled();
+  });
+
+  test('shows no validation errors before save button is clicked', () => {
+    renderSection({ ...mockProps, isEditing: true });
+    const titleInput = screen.getByDisplayValue('Test Section');
+    fireEvent.change(titleInput, { target: { value: '' } });
+
+    expect(screen.queryByText('Title cannot be empty')).not.toBeInTheDocument();
+  });
+
+  test('clears validation errors when switching to view mode', () => {
+    renderSection({ ...mockProps, isEditing: true });
+    const titleInput = screen.getByDisplayValue('Test Section');
+    fireEvent.change(titleInput, { target: { value: '' } });
+
+    const saveButton = screen.getByRole('button', { name: /save/i });
+    fireEvent.click(saveButton);
+
+    const cancelButton = screen.getByRole('button', { name: /cancel/i });
+    fireEvent.click(cancelButton);
+
+    expect(screen.queryByText('Title cannot be empty')).not.toBeInTheDocument();
+  });
+
+  test('validates item description length', () => {
+    const sectionWithLongDesc = {
+      ...mockSection,
+      items: [
+        { id: 'item-1', shortcut: 'ctrl+a', description: 'a'.repeat(51) }
+      ]
+    };
+
+    renderSection({ ...mockProps, section: sectionWithLongDesc, isEditing: true });
+    const saveButton = screen.getByRole('button', { name: /save/i });
+    fireEvent.click(saveButton);
+
+    expect(screen.getByText('Description cannot exceed 50 characters')).toBeInTheDocument();
+    expect(mockProps.onSave).not.toHaveBeenCalled();
+  });
+
+  test('validates shortcut length', () => {
+    const sectionWithLongShortcut = {
+      ...mockSection,
+      items: [
+        { id: 'item-1', shortcut: 'a'.repeat(21), description: 'test' }
+      ]
+    };
+
+    renderSection({ ...mockProps, section: sectionWithLongShortcut, isEditing: true });
+    const saveButton = screen.getByRole('button', { name: /save/i });
+    fireEvent.click(saveButton);
+
+    expect(screen.getByText('Shortcut cannot exceed 20 characters')).toBeInTheDocument();
+    expect(mockProps.onSave).not.toHaveBeenCalled();
+  });
+
+  test('allows save when all validations pass', () => {
+    renderSection({ ...mockProps, isEditing: true });
+    const saveButton = screen.getByRole('button', { name: /save/i });
+    fireEvent.click(saveButton);
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(mockProps.onSave).toHaveBeenCalledWith(mockProps.section.id);
   });
 });
