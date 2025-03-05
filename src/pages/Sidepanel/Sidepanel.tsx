@@ -113,6 +113,8 @@ const Sidepanel: React.FC = () => {
   };
 
   const handleSectionEditSave = (id: string) => {
+    const section = sections.find(s => s.id === id);
+
     // Reset sections to trigger save to storage
     setSections([...sections]);
     setPreSection(null);

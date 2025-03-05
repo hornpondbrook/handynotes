@@ -1,7 +1,9 @@
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, Table, TableBody, TableContainer, TextField, Typography } from '@mui/material';
-import React, { useState } from 'react';
+import { Alert, AlertTitle, Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, Table, TableBody, TableContainer, TextField, Typography } from '@mui/material';
+import React, { useEffect, useState, useCallback } from 'react';
+import debounce from 'lodash/debounce';
 import { SectionModel, ItemModel } from '../../types';
 import Item from './Item';
+import { validateTitle, validateShortcut, validateDescription, ValidationError } from '../../utils/validation';
 
 import {
   Add as AddIcon,
@@ -38,22 +40,70 @@ const Section: React.FC<SectionProps> = ({
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [title, setTitle] = useState(section.title);
+  // const [errors, setErrors] = useState<ValidationError[]>([]);
+  // const [showErrors, setShowErrors] = useState(false);
+  // const [titleDirty, setTitleDirty] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  console.log(`${Date.now()} SECTION ${section.id} rendering`);
+  const [validationErrors, setValidationErrors] = useState<{
+    title?: ValidationError[];
+    items: { [itemId: string]: ValidationError[] };
+  }>({
+    items: {}
+  });
+  const [showValidation, setShowValidation] = useState(false);
+
+  // console.log(`${Date.now()} SECTION ${section.id} rendering`);
+
+  // // Re-validate whenever title or items change
+  // useEffect(() => {
+  //   const validationErrors = validateSection();
+  //   setErrors(validationErrors);
+  // }, [title, section.items]);
+
+  // const validateSection = (): ValidationError[] => {
+  //   const titleErrors = validateTitle(title);
+
+  //   // Track seen shortcuts for duplicate checking
+  //   const seenShortcuts = new Map<string, number>(); // shortcut -> first index
+
+  //   const itemErrors = section.items.flatMap((item, index) => {
+  //     const errors: ValidationError[] = [];
+  //     const normalizedShortcut = item.shortcut.toLowerCase();
+
+  //     // Check basic shortcut and description validation
+  //     errors.push(...validateShortcut(item.shortcut, []));
+  //     errors.push(...validateDescription(item.description));
+
+  //     // Check for duplicates
+  //     if (seenShortcuts.has(normalizedShortcut)) {
+  //       // Only mark subsequent duplicates as errors
+  //       errors.push({
+  //         field: 'shortcut',
+  //         message: `Duplicate of shortcut at position ${index + 1}`
+  //       });
+  //     } else {
+  //       seenShortcuts.set(normalizedShortcut, index);
+  //     }
+
+  //     return errors;
+  //   });
+
+  //   return [...titleErrors, ...itemErrors];
+  // };
 
   const toggleCollapse = () => {
     setIsCollapsed(!isCollapsed);
   };
 
   const handleEditClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent collapse toggle
+    e.stopPropagation();
     setIsCollapsed(false);
     onEditing(section.id);
   };
 
   const handleDeleteClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent collapse toggle
+    e.stopPropagation();
     setDeleteDialogOpen(true);
   };
 
@@ -66,16 +116,88 @@ const Section: React.FC<SectionProps> = ({
   };
 
   const handleSaveClick = () => {
-    onSave(section.id);
+    // const validationErrors = validateSection();
+    // setErrors(validationErrors);
+    // setShowErrors(true);
+
+    // if (validationErrors.length === 0) {
+    //   onSave(section.id);
+    // }
+
+
+    const titleErrors = validateTitle(title);
+    const seenShortcuts = new Map<string, number>();
+
+    const itemValidations: { [itemId: string]: ValidationError[] } = {};
+
+    section.items.forEach((item, index) => {
+      const errors: ValidationError[] = [];
+      const normalizedShortcut = item.shortcut.toLowerCase();
+
+      // Basic validation
+      errors.push(...validateShortcut(item.shortcut));
+      errors.push(...validateDescription(item.description));
+
+      // Duplicate check
+      if (seenShortcuts.has(normalizedShortcut)) {
+        errors.push({
+          field: 'shortcut',
+          message: `Shortcut is a duplicate of item at position ${seenShortcuts.get(normalizedShortcut)! + 1}`
+        });
+      } else {
+        seenShortcuts.set(normalizedShortcut, index);
+      }
+
+      if (errors.length > 0) {
+        itemValidations[item.id] = errors;
+      }
+    });
+
+    const newValidationState = {
+      title: titleErrors.length > 0 ? titleErrors : undefined,
+      items: itemValidations
+    };
+
+    setValidationErrors(newValidationState);
+    setShowValidation(true);
+
+    // Only save if no errors
+    const hasErrors = titleErrors.length > 0 || Object.keys(itemValidations).length > 0;
+    if (!hasErrors) {
+      onSave(section.id);
+    }
   };
 
   const handleCancelClick = () => {
+    setValidationErrors({ items: {} });
+    setShowValidation(false);
     onCancel(section.id);
   };
 
+
+  // const debouncedValidateTitle = useCallback(
+  //   debounce((value: string) => {
+  //     if (titleDirty) {
+  //       const validationErrors = validateTitle(value);
+  //       setErrors(validationErrors);
+  //     }
+  //   }, 500),
+  //   [titleDirty]
+  // );
+
+  // const handleTitleBlur = () => {
+  //   if (titleDirty) {
+  //     const validationErrors = validateTitle(title);
+  //     setErrors(validationErrors);
+  //   }
+  // };
+
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTitle(e.target.value);
-    onUpdate({ ...section, title: e.target.value });
+    const value = e.target.value;
+    // setTitleDirty(true);
+    // debouncedValidateTitle(value);
+    setTitle(value);
+    onUpdate({ ...section, title: value });
   };
   const handleItemUpdate = (updatedItem: ItemModel) => {
     onUpdate({
@@ -152,6 +274,11 @@ const Section: React.FC<SectionProps> = ({
               size="small"
               value={title}
               onChange={handleTitleChange}
+              // onBlur={handleTitleBlur}
+              // error={titleDirty && errors.length > 0}
+              // helperText={titleDirty && errors[0]?.message}
+              error={showValidation && !!validationErrors.title}
+              helperText={showValidation && validationErrors.title?.[0]?.message}
               sx={{
                 marginRight: 2,
                 '& .MuiOutlinedInput-root': {
@@ -176,13 +303,15 @@ const Section: React.FC<SectionProps> = ({
             {isEditing ? (
               <>
                 <IconButton
-                  aria-label="save" // Add aria-label
+                  aria-label="save"
                   onClick={handleSaveClick}
-                  color="primary" sx={{ '& svg': { fontSize: 20 } }}>
+                  // color={showErrors && errors.length > 0 ? "error" : "primary"}
+                  // disabled={errors.length > 0}
+                  sx={{ '& svg': { fontSize: 20 } }}>
                   <SaveIcon />
                 </IconButton>
                 <IconButton
-                  aria-label="cancel" // Add aria-label
+                  aria-label="cancel"
                   onClick={handleCancelClick}
                   color="error" sx={{ '& svg': { fontSize: 20 } }}>
                   <CloseIcon />
@@ -191,13 +320,13 @@ const Section: React.FC<SectionProps> = ({
             ) : (
               <>
                 <IconButton
-                  aria-label="edit" // Add aria-label
+                  aria-label="edit"
                   onClick={handleEditClick}
                   color="primary" sx={{ '& svg': { fontSize: 20 } }}>
                   <EditIcon />
                 </IconButton>
                 <IconButton
-                  aria-label="delete" // Add aria-label
+                  aria-label="delete"
                   onClick={handleDeleteClick}
                   color="error" sx={{ '& svg': { fontSize: 20 } }}>
                   <DeleteIcon />
@@ -213,21 +342,14 @@ const Section: React.FC<SectionProps> = ({
               <Table size="small" sx={{ width: "100%", tableLayout: "auto" }}>
                 <TableBody>
                   {section.items.map((item, index) => {
-                    // console.log('item.map:', `${section.id}-${item.id}`, index, section.items);
                     return (
                       <Item
                         key={`${section.id}-${item.id}`}
                         item={item}
                         isEditing={isEditing}
+                        validationErrors={showValidation ? validationErrors.items[item.id] : []}
                         onUpdate={handleItemUpdate}
                         onDelete={() => handleItemDelete(item.id)}
-                      // onItemUpdate={(newShortcut, newDescription) =>
-                      //   handleItemUpdate(index, newShortcut, newDescription)
-                      // }
-                      // onItemDelete={() => {
-                      //   // console.log('Deleting item from handler:', `${section.id}-${item.id}`, index, section.items);
-                      //   handleItemDelete(item.id)
-                      // }}
                       />
                     );
                   })}

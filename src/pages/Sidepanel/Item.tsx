@@ -1,29 +1,89 @@
 import { Delete as DeleteIcon } from '@mui/icons-material';
 import { IconButton, TableCell, TableRow, TextField, Typography } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
+import debounce from 'lodash/debounce';
 import { ItemModel } from '../../types';
+import { validateShortcut, validateDescription, ValidationError } from '../../utils/validation';
 
 interface ItemProps {
   item: ItemModel;
   isEditing: boolean;
+  validationErrors?: ValidationError[];
   onUpdate: (item: ItemModel) => void;
-  onDelete: () => void;
+  onDelete: () => void
 }
 
-const Item: React.FC<ItemProps> = ({ item, isEditing, onUpdate, onDelete }) => {
+const Item: React.FC<ItemProps> = ({
+  item,
+  isEditing,
+  validationErrors = [],
+  onUpdate,
+  onDelete }) => {
 
   const [localShortcut, setLocalShortcut] = useState(item.shortcut);
   const [localDescription, setLocalDescription] = useState(item.description);
 
+  const getFieldError = (field: 'shortcut' | 'description') =>
+    validationErrors.find(e => e.field === field)?.message;
+
+  // const [errors, setErrors] = useState<ValidationError[]>([]);
+  // const [shortcutDirty, setShortcutDirty] = useState(false);
+  // const [descriptionDirty, setDescriptionDirty] = useState(false);
+
   // console.log(`${Date.now()} ITEM ${item.shortcut} rendering`);
 
+  // const debouncedValidateShortcut = useCallback(
+  //   debounce((value: string) => {
+  //     if (shortcutDirty) {
+  //       const validationErrors = validateShortcut(value);
+  //       setErrors(prev => [...prev.filter(e => e.field !== 'shortcut'), ...validationErrors]);
+  //     }
+  //   }, 500),
+  //   [shortcutDirty]
+  // );
+
+  // const debouncedValidateDescription = useCallback(
+  //   debounce((value: string) => {
+  //     if (descriptionDirty) {
+  //       const validationErrors = validateDescription(value);
+  //       setErrors(prev => [...prev.filter(e => e.field !== 'description'), ...validationErrors]);
+  //     }
+  //   }, 500),
+  //   [descriptionDirty]
+  // );
+
+  // const handleShortcutBlur = () => {
+  //   if (shortcutDirty) {
+  //     const validationErrors = validateShortcut(localShortcut);
+  //     setErrors(prev => [...prev.filter(e => e.field !== 'shortcut'), ...validationErrors]);
+  //     console.log('Shortcut errors:', validationErrors);
+  //   }
+  // };
+
+  // const handleDescriptionBlur = () => {
+  //   if (descriptionDirty) {
+  //     const validationErrors = validateDescription(localDescription);
+  //     setErrors(prev => [...prev.filter(e => e.field !== 'description'), ...validationErrors]);
+  //   }
+  // };
+
+  // const getFieldError = (field: 'shortcut' | 'description') =>
+  //   errors.find(e => e.field === field)?.message;
+
   const handleShortcutChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLocalShortcut(e.target.value);
-    onUpdate({ ...item, shortcut: e.target.value });
+    const value = e.target.value;
+    setLocalShortcut(value);
+    // setShortcutDirty(true);
+    // debouncedValidateShortcut(value);
+    onUpdate({ ...item, shortcut: value });
   };
+
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLocalDescription(e.target.value);
-    onUpdate({ ...item, description: e.target.value });
+    const value = e.target.value;
+    setLocalDescription(value);
+    // setDescriptionDirty(true);
+    // debouncedValidateDescription(value);
+    onUpdate({ ...item, description: value });
   };
 
   return (
@@ -36,6 +96,11 @@ const Item: React.FC<ItemProps> = ({ item, isEditing, onUpdate, onDelete }) => {
               size="small"
               value={localShortcut}
               onChange={handleShortcutChange}
+              error={!!getFieldError('shortcut')}
+              helperText={getFieldError('shortcut')}
+              // onBlur={handleShortcutBlur}
+              // error={shortcutDirty && !!getFieldError('shortcut')}
+              // helperText={shortcutDirty && getFieldError('shortcut')}
               placeholder="Enter shortcut" // Add placeholder
               sx={{
                 '& .MuiInputBase-input::placeholder': {
@@ -51,6 +116,11 @@ const Item: React.FC<ItemProps> = ({ item, isEditing, onUpdate, onDelete }) => {
               size="small"
               value={localDescription}
               onChange={handleDescriptionChange}
+              error={!!getFieldError('description')}
+              helperText={getFieldError('description')}
+              // onBlur={handleDescriptionBlur}
+              // error={descriptionDirty && !!getFieldError('description')}
+              // helperText={descriptionDirty && getFieldError('description')}
               placeholder="Enter description" // Add placeholder
               sx={{
                 '& .MuiInputBase-input::placeholder': {

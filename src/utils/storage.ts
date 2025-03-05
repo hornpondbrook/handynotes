@@ -20,13 +20,13 @@ export class StorageUtils {
 
   static async getSections(): Promise<SectionsModel> {
     const result = await chrome.storage.local.get(this.STORAGE_KEY);
-    console.log(`${Date.now()} getSections: ${JSON.stringify(result)}`);
+    // console.log(`${Date.now()} getSections: ${JSON.stringify(result)}`);
     return result[this.STORAGE_KEY] || [];
   }
 
   static async setSections(sections: SectionsModel): Promise<void> {
     await chrome.storage.local.set({ [this.STORAGE_KEY]: sections });
-    console.log(`${Date.now()} setSections: ${JSON.stringify(sections)}`);
+    // console.log(`${Date.now()} setSections: ${JSON.stringify(sections)}`);
   }
 
   // static async addSection(section: SectionModel): Promise<void> {
