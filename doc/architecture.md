@@ -224,3 +224,20 @@ User Action → Component Event Handler → State Update → Re-render → Stora
    - getSections(): Load all sections
    - setSections(sections): Save all sections
    - Other utility methods for specific operations
+
+## Configuration Management
+
+### Constants and Configuration
+The application uses a centralized configuration approach for maintainability:
+
+### Current Implementation
+- `config.ts`: Core constants for validation and storage
+- Constants used in `storage.ts` and `validation.ts`
+- Simple flat structure suitable for current project size
+
+### Future Considerations
+For project growth:
+- Move to `/config` directory structure
+- Split into domain-specific files
+- Add environment-specific configs
+- Implement feature flags

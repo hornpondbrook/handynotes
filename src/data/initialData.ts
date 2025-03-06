@@ -86,19 +86,17 @@ export const initializeInitialSections = async (): Promise<SectionsModel> => {
   let sections: SectionsModel = [];
   for (let i = 0; i < initialData.length; i++) {
     const sectionData = initialData[i];
-    const sectionId = await StorageUtils.generateSectionId(sectionData.title);
     let items: ItemModel[] = [];
     for (let j = 0; j < sectionData.items.length; j++) {
       const itemData = sectionData.items[j];
-      const itemId = await StorageUtils.generateItemId();
       items.push({
-        id: "i" + j.toString(), //itemId,
+        id: "i" + j.toString(),
         shortcut: itemData.key,
         description: itemData.desc
       });
     }
     sections.push({
-      id: "s" + i.toString(), //sectionId,
+      id: "s" + i.toString(),
       title: sectionData.title,
       items: items
     });

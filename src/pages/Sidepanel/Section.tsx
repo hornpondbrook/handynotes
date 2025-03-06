@@ -1,6 +1,5 @@
-import { Alert, AlertTitle, Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, Table, TableBody, TableContainer, TextField, Typography } from '@mui/material';
-import React, { useEffect, useState, useCallback } from 'react';
-import debounce from 'lodash/debounce';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, Table, TableBody, TableContainer, TextField, Typography } from '@mui/material';
+import React, { useState } from 'react';
 import { SectionModel, ItemModel } from '../../types';
 import Item from './Item';
 import { validateTitle, validateShortcut, validateDescription, ValidationError } from '../../utils/validation';
@@ -40,9 +39,6 @@ const Section: React.FC<SectionProps> = ({
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [title, setTitle] = useState(section.title);
-  // const [errors, setErrors] = useState<ValidationError[]>([]);
-  // const [showErrors, setShowErrors] = useState(false);
-  // const [titleDirty, setTitleDirty] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const [validationErrors, setValidationErrors] = useState<{
@@ -54,43 +50,6 @@ const Section: React.FC<SectionProps> = ({
   const [showValidation, setShowValidation] = useState(false);
 
   // console.log(`${Date.now()} SECTION ${section.id} rendering`);
-
-  // // Re-validate whenever title or items change
-  // useEffect(() => {
-  //   const validationErrors = validateSection();
-  //   setErrors(validationErrors);
-  // }, [title, section.items]);
-
-  // const validateSection = (): ValidationError[] => {
-  //   const titleErrors = validateTitle(title);
-
-  //   // Track seen shortcuts for duplicate checking
-  //   const seenShortcuts = new Map<string, number>(); // shortcut -> first index
-
-  //   const itemErrors = section.items.flatMap((item, index) => {
-  //     const errors: ValidationError[] = [];
-  //     const normalizedShortcut = item.shortcut.toLowerCase();
-
-  //     // Check basic shortcut and description validation
-  //     errors.push(...validateShortcut(item.shortcut, []));
-  //     errors.push(...validateDescription(item.description));
-
-  //     // Check for duplicates
-  //     if (seenShortcuts.has(normalizedShortcut)) {
-  //       // Only mark subsequent duplicates as errors
-  //       errors.push({
-  //         field: 'shortcut',
-  //         message: `Duplicate of shortcut at position ${index + 1}`
-  //       });
-  //     } else {
-  //       seenShortcuts.set(normalizedShortcut, index);
-  //     }
-
-  //     return errors;
-  //   });
-
-  //   return [...titleErrors, ...itemErrors];
-  // };
 
   const toggleCollapse = () => {
     setIsCollapsed(!isCollapsed);
@@ -116,15 +75,6 @@ const Section: React.FC<SectionProps> = ({
   };
 
   const handleSaveClick = () => {
-    // const validationErrors = validateSection();
-    // setErrors(validationErrors);
-    // setShowErrors(true);
-
-    // if (validationErrors.length === 0) {
-    //   onSave(section.id);
-    // }
-
-
     const titleErrors = validateTitle(title);
     const seenShortcuts = new Map<string, number>();
 
@@ -174,28 +124,8 @@ const Section: React.FC<SectionProps> = ({
     onCancel(section.id);
   };
 
-
-  // const debouncedValidateTitle = useCallback(
-  //   debounce((value: string) => {
-  //     if (titleDirty) {
-  //       const validationErrors = validateTitle(value);
-  //       setErrors(validationErrors);
-  //     }
-  //   }, 500),
-  //   [titleDirty]
-  // );
-
-  // const handleTitleBlur = () => {
-  //   if (titleDirty) {
-  //     const validationErrors = validateTitle(title);
-  //     setErrors(validationErrors);
-  //   }
-  // };
-
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    // setTitleDirty(true);
-    // debouncedValidateTitle(value);
     setTitle(value);
     onUpdate({ ...section, title: value });
   };
@@ -226,8 +156,6 @@ const Section: React.FC<SectionProps> = ({
       items: [...section.items, newItem]
     });
   };
-
-
 
   return (
     <>
@@ -264,7 +192,7 @@ const Section: React.FC<SectionProps> = ({
               backgroundColor: 'grey.300'
             }
           }}
-          {...provided.dragHandleProps} // Move drag handle props here
+          {...provided.dragHandleProps}
           onClick={isEditing ? undefined : toggleCollapse}
         >
           {isEditing ? (
@@ -274,9 +202,6 @@ const Section: React.FC<SectionProps> = ({
               size="small"
               value={title}
               onChange={handleTitleChange}
-              // onBlur={handleTitleBlur}
-              // error={titleDirty && errors.length > 0}
-              // helperText={titleDirty && errors[0]?.message}
               error={showValidation && !!validationErrors.title}
               helperText={showValidation && validationErrors.title?.[0]?.message}
               sx={{
@@ -305,8 +230,6 @@ const Section: React.FC<SectionProps> = ({
                 <IconButton
                   aria-label="save"
                   onClick={handleSaveClick}
-                  // color={showErrors && errors.length > 0 ? "error" : "primary"}
-                  // disabled={errors.length > 0}
                   sx={{ '& svg': { fontSize: 20 } }}>
                   <SaveIcon />
                 </IconButton>
@@ -389,13 +312,13 @@ const Section: React.FC<SectionProps> = ({
           </DialogContent>
           <DialogActions>
             <Button
-              aria-label="cancel" // Add aria-label
+              aria-label="cancel"
               onClick={handleDeleteCancel}
               color="primary">
               Cancel
             </Button>
             <Button
-              aria-label="confirm" // Add aria-label
+              aria-label="confirm"
               onClick={handleDeleteConfirm}
               color="error" variant="contained">
               Delete
@@ -408,20 +331,3 @@ const Section: React.FC<SectionProps> = ({
 };
 
 export default Section;
-
-// Export memoized version
-// export default React.memo(Section, (prevProps, nextProps) => {
-//   console.log(`${Date.now()} MEMO compare for section ${prevProps.section.id}:`, {
-//     prevProps,
-//     nextProps,
-//     areEqual: prevProps.section === nextProps.section
-//   });
-//   // Return true if props are equal (no re-render needed)
-//   return (
-//     prevProps.section.id === nextProps.section.id &&
-//     prevProps.section.title === nextProps.section.title &&
-//     prevProps.section.items === nextProps.section.items &&
-//     prevProps.index === nextProps.index &&
-//     prevProps.isEditing === nextProps.isEditing
-//   );
-// });

@@ -1,5 +1,5 @@
 import { STORAGE } from '../config';
-import { SectionModel, SectionsModel } from '../types';
+import { SectionsModel } from '../types';
 
 export class StorageUtils {
   private static readonly HIGHEST_SECTION_INDEX_KEY = 'handynote_highest_section_index';
@@ -26,50 +26,6 @@ export class StorageUtils {
 
   static async setSections(sections: SectionsModel): Promise<void> {
     await chrome.storage.local.set({ [STORAGE.KEY]: sections });
-    console.log(`${Date.now()} setSections: ${JSON.stringify(sections)}`);
-  }
-
-  // static async addSection(section: SectionModel): Promise<void> {
-  //   const sections = await this.getSections();
-  //   sections.push(section);
-  //   await this.setSections(sections);
-  //   const highestSectionIndex = await this.getHighestSectionIndex();
-  //   await chrome.storage.local.set({ [this.HIGHEST_SECTION_INDEX_KEY]: highestSectionIndex + 1 });
-  // }
-
-  // static async updateSection(sectionId: string, updatedSection: SectionModel): Promise<void> {
-  //   const sections = await this.getSections();
-  //   const index = sections.findIndex(s => s.id === sectionId);
-  //   if (index !== -1) {
-  //     sections[index] = updatedSection;
-  //     await this.setSections(sections);
-  //   }
-  // }
-
-  // static async deleteSection(sectionId: string): Promise<void> {
-  //   const sections = await this.getSections();
-  //   const filtered = sections.filter(s => s.id !== sectionId);
-  //   await this.setSections(filtered);
-  // }
-
-  static async getHighestSectionIndex(): Promise<number> {
-    const result = await chrome.storage.local.get(this.HIGHEST_SECTION_INDEX_KEY);
-    return result[this.HIGHEST_SECTION_INDEX_KEY] || 0;
-  }
-
-  static async getHighestItemIndex(): Promise<number> {
-    const result = await chrome.storage.local.get(this.HIGHEST_ITEM_INDEX_KEY);
-    return result[this.HIGHEST_ITEM_INDEX_KEY] || 0;
-  }
-
-  static async generateSectionId(title: string): Promise<string> {
-    const urlFriendlyTitle = title.toLowerCase().replace(/\s+/g, '-');
-    const highestSectionIndex = await this.getHighestSectionIndex();
-    return `${urlFriendlyTitle}-${highestSectionIndex + 1}`;
-  }
-
-  static async generateItemId(): Promise<string> {
-    const highestItemIndex = await this.getHighestItemIndex();
-    return `${highestItemIndex + 1}`;
+    // console.log(`${Date.now()} setSections: ${JSON.stringify(sections)}`);
   }
 }

@@ -5,7 +5,6 @@ import React, { useEffect, useState } from 'react';
 import { DragDropContext, Draggable, Droppable, DropResult } from 'react-beautiful-dnd';
 import theme from '../../theme';
 import { StorageUtils } from '../../utils/storage';
-import { initializeInitialSections } from '../../data/initialData';
 import { SectionsModel, SectionModel } from '../../types';
 import Section from './Section';
 
@@ -19,13 +18,7 @@ const Sidepanel: React.FC = () => {
   // Add effect to load data from storage
   useEffect(() => {
     const loadData = async () => {
-      // await StorageUtils.initializeStorage();
       let data = await StorageUtils.getSections();
-      // console.log(`${Date.now()} STORAGE loaded ${data.length} sections`);
-      // if (data.length === 0) {
-      //   data = await initializeInitialSections();
-      //   await StorageUtils.setSections(data);
-      // }
       setSections(data);
     };
     loadData();
@@ -36,23 +29,6 @@ const Sidepanel: React.FC = () => {
     console.log(`${Date.now()} STORAGE updates ${sections.length} sections`);
     StorageUtils.setSections(sections);
   }, [sections]);
-
-  // Add unload effect
-  // useEffect(() => {
-  //   const handleUnload = () => {
-  //     StorageUtils.setSections(sections);
-  //   };
-
-  //   // Call handleUnload on page refresh or exit
-  //   // console.log(`${Date.now()} SESSION updated ${JSON.stringify(sections)}`);
-  //   window.addEventListener('beforeunload', handleUnload);
-
-  //   return () => {
-  //     window.removeEventListener('beforeunload', handleUnload);
-  //     // Save on unmount as well
-  //     handleUnload();
-  //   };
-  // }, [sections]);
 
   const handleSectionMove = (result: DropResult) => {
     // dropped outside the list
@@ -113,8 +89,6 @@ const Sidepanel: React.FC = () => {
   };
 
   const handleSectionEditSave = (id: string) => {
-    const section = sections.find(s => s.id === id);
-
     // Reset sections to trigger save to storage
     setSections([...sections]);
     setPreSection(null);
@@ -168,7 +142,6 @@ const Sidepanel: React.FC = () => {
                     <Box
                       ref={provided.innerRef}
                       {...provided.draggableProps}
-                      // {...provided.dragHandleProps}
                       sx={{
                         border: 'none',
                         backgroundColor: 'transparent'
@@ -179,7 +152,7 @@ const Sidepanel: React.FC = () => {
                         section={section}
                         index={index}
                         isEditing={preSection?.index === index}
-                        provided={provided} // Pass provided prop
+                        provided={provided}
                         onEditing={handleSectionEditStart}
                         onUpdate={handleSectionUpdate}
                         onDelete={handleSectionDelete}
