@@ -19,40 +19,40 @@ const Sidepanel: React.FC = () => {
   // Add effect to load data from storage
   useEffect(() => {
     const loadData = async () => {
-      await StorageUtils.initializeStorage();
+      // await StorageUtils.initializeStorage();
       let data = await StorageUtils.getSections();
-      console.log(`${Date.now()} STORAGE loaded ${data.length} sections`);
-      if (data.length === 0) {
-        data = await initializeInitialSections();
-        await StorageUtils.setSections(data);
-      }
+      // console.log(`${Date.now()} STORAGE loaded ${data.length} sections`);
+      // if (data.length === 0) {
+      //   data = await initializeInitialSections();
+      //   await StorageUtils.setSections(data);
+      // }
       setSections(data);
     };
     loadData();
   }, []);
 
   // Add effect to handle storage updates
-  // useEffect(() => {
-  //   console.log(`${Date.now()} STORAGE updates ${sections.length} sections`);
-  //   StorageUtils.setSections(sections);
-  // }, [sections]);
+  useEffect(() => {
+    console.log(`${Date.now()} STORAGE updates ${sections.length} sections`);
+    StorageUtils.setSections(sections);
+  }, [sections]);
 
   // Add unload effect
-  useEffect(() => {
-    const handleUnload = () => {
-      StorageUtils.setSections(sections);
-    };
+  // useEffect(() => {
+  //   const handleUnload = () => {
+  //     StorageUtils.setSections(sections);
+  //   };
 
-    // Call handleUnload on page refresh or exit
-    // console.log(`${Date.now()} SESSION updated ${JSON.stringify(sections)}`);
-    window.addEventListener('beforeunload', handleUnload);
+  //   // Call handleUnload on page refresh or exit
+  //   // console.log(`${Date.now()} SESSION updated ${JSON.stringify(sections)}`);
+  //   window.addEventListener('beforeunload', handleUnload);
 
-    return () => {
-      window.removeEventListener('beforeunload', handleUnload);
-      // Save on unmount as well
-      handleUnload();
-    };
-  }, [sections]);
+  //   return () => {
+  //     window.removeEventListener('beforeunload', handleUnload);
+  //     // Save on unmount as well
+  //     handleUnload();
+  //   };
+  // }, [sections]);
 
   const handleSectionMove = (result: DropResult) => {
     // dropped outside the list

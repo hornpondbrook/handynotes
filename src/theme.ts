@@ -42,7 +42,11 @@ const theme = createTheme({
     ].join(','),
     fontSize: 10,
     h6: {
-      fontSize: '0.8rem',
+      fontSize: '0.7rem',
+      fontWeight: 600,
+      marginTop: '0.1em',
+      marginBottom: '0.1em',
+      lineHeight: 1.2
     },
   },
   shape: {

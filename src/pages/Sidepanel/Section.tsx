@@ -236,7 +236,7 @@ const Section: React.FC<SectionProps> = ({
           backgroundColor: 'background.paper',
           borderRadius: 2,
           boxShadow: 1,
-          marginBottom: 2,
+          marginBottom: 1,
           border: 'none',  // Add this to remove default border
           '& .section-controls': {
             display: 'flex',
@@ -255,7 +255,7 @@ const Section: React.FC<SectionProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '2px 4px',
+            padding: '1px 6px',
             backgroundColor: 'grey.200',
             borderBottom: '1px solid',
             borderColor: 'divider',
