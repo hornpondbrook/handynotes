@@ -22,6 +22,10 @@ This project is built upon a robust boilerplate that includes:
 
 The original boilerplate was inspired by and adapted from [https://github.com/samuelsimoes/chrome-extension-webpack-boilerplate](https://github.com/samuelsimoes/chrome-extension-webpack-boilerplate).
 
+## Demo
+
+![App Demo](demo.gif)
+
 ## Installing and Running
 
 ### Procedures:
