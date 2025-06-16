@@ -24,7 +24,7 @@ The original boilerplate was inspired by and adapted from [https://github.com/sa
 
 ## Demo
 
-![App Demo](demo.gif)
+![App Demo](handynotes.gif)
 
 ## Installing and Running
 
