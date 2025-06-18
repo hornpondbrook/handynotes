@@ -8,7 +8,7 @@ A Chrome extension for keeping handy notes, built with React 18, Webpack 5, and 
 
 Handy Notes React allows you to keep track of keyboard shortcuts and anything noteworthy or memorable through a convenient side panel in your Chrome browser.
 
-This project is built upon a robust boilerplate that includes:
+This project was bootstrapped from a feature-rich boilerplate, which provided a solid starting point with the following technologies:
 
 - Chrome Extension Manifest V3
 - React 18
@@ -19,8 +19,6 @@ This project is built upon a robust boilerplate that includes:
 - `eslint-config-react-app`
 - Prettier
 - TypeScript
-
-The original boilerplate was inspired by and adapted from [https://github.com/samuelsimoes/chrome-extension-webpack-boilerplate](https://github.com/samuelsimoes/chrome-extension-webpack-boilerplate).
 
 ## Demo
 
@@ -138,6 +136,8 @@ ApiCall({ key: secrets.key });
 
 - [Webpack documentation](https://webpack.js.org/concepts/)
 - [Chrome Extension documentation](https://developer.chrome.com/extensions/getstarted)
+
+This project originated from the [chrome-extension-webpack-boilerplate](https://github.com/samuelsimoes/chrome-extension-webpack-boilerplate), which served as the foundational template.
 
 ---
 
